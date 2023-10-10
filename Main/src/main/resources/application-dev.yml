@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    dynamic:
+      primary: livedb
+      datasource:
+        livedb:
+          url: jdbc:mysql://36.138.118.173:3306/test?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useUnicode=true&allowMultiQueries=true
+          username: liveplat-dev
+          password: Abcsz@95599
+          driver-class-name: com.mysql.cj.jdbc.Driver
+        postgres:
+          url: jdbc:mysql://36.138.118.173:3306/test?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useUnicode=true&allowMultiQueries=true
+          username: liveplat-dev
+          password: Abcsz@95599
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+user:
+  login:
+    verify:
+      expire: 360000
+      interval: 60000
+
+sms:
+  cKey: sD9Gg7c3U7qBnByvLRkv052D
+  cKey16: 2SRhkP97d4AcPdA1
+  sendSite: ZJSys
+  smsSendSite: zjsw_web
+  method: SMSService
+  apiUrl: https://app.szh.abchina.com/WcfServiceAccess/service1.svc/Access
+
+easemob:
+  baseUrl: https://a1.easemob.com
+  accessToken: YWMtQfswPPraEe2WcmOpQTWmXUdhHXzmSzwgt3fCAXdmbOQlieFPSy1N47nhsidjGNW7AgMAAAGIUiEjegAAAAAqwbpLR6M7VArPFRZMGoUr0qwkXpsZoK-w7LXu4EIMYA
+  adminUsername: admin
+  adminUserToken: YWMtdiEyCPraEe2A7ime2SjRYSWJ4U9LLU3jueGyJ2MY1btrdEVw-toR7aLJGZ_A5TEmAwMAAAGIUiJ5PQAAAAASUY0_3BCPB91hlOT9XwOD6FnQaBfDjn-aeLn_iLarBg
+  appkey: 1164230525160375#jinsui-live-room
+  clientId: YXA6JYnhT0stTeO54bInYxjVuw
+  clientSecret: YXA6rx6Sdqw3HCHZ3fSoNlGibUXY7uc
+  appName: jinsui-live-room
+  orgId: 1164230525160375
+
+oauth:
+  getOpenIdUrl: http://app.js.abchina.com/jiangsu/sz/eua/api/qywx/out/wxcommon/gettoken
+  openIdKey: abcsz95599000001
+  getMbInfoUrl: http://app.js.abchina.com/jiangsu/sz/eua/api/share/login/loginwithsession
+  mbInfoKey: E2LhkPu8d5YypQd9
