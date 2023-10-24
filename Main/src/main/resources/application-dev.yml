@@ -8,16 +8,6 @@ spring:
           username: root
           password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
-        livedb:
-          url: jdbc:mysql://36.138.118.173:3306/test?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useUnicode=true&allowMultiQueries=true
-          username: liveplat-dev
-          password: Abcsz@95599
-          driver-class-name: com.mysql.cj.jdbc.Driver
-        postgres:
-          url: jdbc:mysql://36.138.118.173:3306/test?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useUnicode=true&allowMultiQueries=true
-          username: liveplat-dev
-          password: Abcsz@95599
-          driver-class-name: com.mysql.cj.jdbc.Driver
 
 user:
   login:

@@ -3,6 +3,7 @@ package org.ltboys.dto.ro;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class QueryGamesRo {
@@ -14,5 +15,7 @@ public class QueryGamesRo {
     private Integer limit;
 
     private Integer page;
+
+    private List<Integer> tagList;
 
 }
