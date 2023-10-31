@@ -3,6 +3,7 @@ package org.ltboys.controller;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.action.ActionResult;
+import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
 import org.ltboys.service.GamesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,17 @@ public class GamesController {
     @Autowired
     private GamesService gamesService;
 
-    @PostMapping("/game")
-    public ActionResult viewGame (@RequestBody @Validated int id) throws Exception {
+    /**
+     * 查询单个游戏信息及其tag信息
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/viewgame")
+    public ActionResult viewGame (@RequestBody @Validated IdRo ro) throws Exception {
 
         try {
-            JSONObject vo = gamesService.viewGame(id);
+            JSONObject vo = gamesService.viewGame(ro);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -30,6 +37,12 @@ public class GamesController {
         }
     }
 
+    /**
+     * 根据条件查询游戏列表（分页）
+     * @param ro
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/querygames")
     public ActionResult queryGames (@RequestBody @Validated QueryGamesRo ro) throws Exception {
         try {

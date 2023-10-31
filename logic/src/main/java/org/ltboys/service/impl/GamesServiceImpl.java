@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.Null;
+import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
 import org.ltboys.mysql.entity.GamesEntity;
+import org.ltboys.mysql.entity.TagEntity;
 import org.ltboys.mysql.entity.TagMapEntity;
 import org.ltboys.mysql.mapper.GamesMapper;
 import org.ltboys.mysql.mapper.TagMapMapper;
@@ -16,10 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,15 +35,37 @@ public class GamesServiceImpl  implements GamesService {
     private TagMapMapper tagMapMapper;
 
     @Override
-    public JSONObject viewGame(int id) throws Exception{
+    public JSONObject viewGame(IdRo ro) throws Exception{
         JSONObject retJson = new JSONObject();
 
         QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
-        gamesEntityQueryWrapper.eq("id",id);
-        List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
-        if (gamesEntityList.size()==1){
-            retJson.put("GameList",gamesEntityList);
+        gamesEntityQueryWrapper.eq("id",ro.getId());
+        gamesEntityQueryWrapper
+                .select("id","name","cover","`desc`","publisher","score","release_time");
+        List<Map<String , Object>> viewGameList = gamesMapper.selectMaps(gamesEntityQueryWrapper);
+        //List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+
+        if (viewGameList.size()!=1){
+            retJson.put("retCode","9999");
+            retJson.put("retMsg","game数据异常");
+            return retJson;
         }
+
+        QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
+        tagMapEntityQueryWrapper
+                .eq("game_id",ro.getId());
+        List<TagMapEntity> tagMapEntityList = tagMapMapper.selectList(tagMapEntityQueryWrapper);
+        if (tagMapEntityList.size()!=0){
+            //提取tagMapEntityList中tagId字段作为一个新列表
+            List<Integer> tagIdList = tagMapEntityList.stream().map(TagMapEntity::getTagId).collect(Collectors.toList());
+            //根据tagId列表批量查询
+            List<TagEntity> tagEntityList = tagMapper.selectBatchIds(tagIdList);
+            retJson.put("Tags",tagEntityList);
+        } else {
+            retJson.put("Tags",new ArrayList<>());
+        }
+
+        retJson.put("Game",viewGameList);
 
         return retJson;
     }
@@ -56,7 +78,7 @@ public class GamesServiceImpl  implements GamesService {
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
 
         if (!Objects.equals(ro.getName(), "")){
-            gamesEntityQueryWrapper.eq("name",ro.getName());
+            gamesEntityQueryWrapper.like("name",ro.getName());
         }
 
         if (!Objects.equals(ro.getReleaseTime(),"")){
@@ -66,6 +88,7 @@ public class GamesServiceImpl  implements GamesService {
             gamesEntityQueryWrapper.ge("release_time",startTime);
         }
 
+        //根据tag查询
         List<Integer> tagList = ro.getTagList();
         if (tagList.size()!=0){
             List<Integer> gameIdList = new ArrayList<>();
