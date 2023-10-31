@@ -38,6 +38,22 @@ public class GamesController {
     }
 
     /**
+     * 获取tag列表
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/gettags")
+    public ActionResult getTags () throws Exception {
+        try {
+            JSONObject vo = gamesService.getTags();
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("查询tag失败");
+        }
+    }
+
+    /**
      * 根据条件查询游戏列表（分页）
      * @param ro
      * @return

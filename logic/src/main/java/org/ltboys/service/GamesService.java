@@ -23,4 +23,11 @@ public interface GamesService {
      * @throws Exception
      */
     JSONObject queryGames(QueryGamesRo ro) throws Exception;
+
+    /**
+     * 获取tag列表
+     * @return
+     * @throws Exception
+     */
+    JSONObject getTags() throws Exception;
 }

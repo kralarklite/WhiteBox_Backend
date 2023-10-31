@@ -113,4 +113,13 @@ public class GamesServiceImpl  implements GamesService {
 
         return retJson;
     }
+
+    @Override
+    public JSONObject getTags() throws Exception {
+        JSONObject retJson = new JSONObject();
+        QueryWrapper<TagEntity> tagEntityQueryWrapper = new QueryWrapper<>();
+        List<TagEntity> tagEntityList = tagMapper.selectList(tagEntityQueryWrapper);
+        retJson.put("TagList",tagEntityList);
+        return retJson;
+    }
 }
