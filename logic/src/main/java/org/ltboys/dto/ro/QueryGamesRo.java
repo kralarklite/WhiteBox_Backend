@@ -16,6 +16,8 @@ public class QueryGamesRo {
 
     private Integer page;
 
-    private List<Integer> tagList;
+    private Integer tagId;
+
+    private boolean needTag;
 
 }

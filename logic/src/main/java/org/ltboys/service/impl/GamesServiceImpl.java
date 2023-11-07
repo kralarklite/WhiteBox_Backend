@@ -77,10 +77,12 @@ public class GamesServiceImpl  implements GamesService {
         QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
 
+        //根据游戏名查询
         if (!Objects.equals(ro.getName(), "")){
             gamesEntityQueryWrapper.like("name",ro.getName());
         }
 
+        //筛选条件：release_time
         if (!Objects.equals(ro.getReleaseTime(),"")){
             String start = ro.getReleaseTime();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -89,29 +91,69 @@ public class GamesServiceImpl  implements GamesService {
         }
 
         //根据tag查询
+        Integer tagId = ro.getTagId();
+        if (!Objects.equals(tagId, 0)){
+            tagMapEntityQueryWrapper.eq("tag_id",tagId);
+            if (tagMapMapper.exists(tagMapEntityQueryWrapper)){
+                List<Integer> gameIdList = tagMapMapper.selectList(tagMapEntityQueryWrapper).stream().map(TagMapEntity::getGameId).collect(Collectors.toList());
+                gamesEntityQueryWrapper.in("id",gameIdList);
+            } else {
+                retJson.put("retCode","9999");
+                retJson.put("retMsg","该标签无游戏");
+                return retJson;
+            }
+        }
+/*
         List<Integer> tagList = ro.getTagList();
         if (tagList.size()!=0){
             List<Integer> gameIdList = new ArrayList<>();
             for (Integer tagId : tagList){
-                String tag_sql = "LEFT JOIN of_shop_members t1 ON (t1.id = t.id) ";
+                //String tag_sql = "LEFT JOIN of_shop_members t1 ON (t1.id = t.id) ";
                 tagMapEntityQueryWrapper.eq("","");
             }
         }
+*/
 
+        //分页查询
         int limit = ro.getLimit();
         int page = ro.getPage();
         int offset = limit * (page - 1);
-        String limitsql = "LIMIT " + limit + " OFFSET " + offset;
-        gamesEntityQueryWrapper.last(limitsql);
+        String limit_sql = "LIMIT " + limit + " OFFSET " + offset;
+        gamesEntityQueryWrapper.last(limit_sql);
 
         gamesEntityQueryWrapper.orderByDesc("id");
 
         List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+
         if (gamesEntityList.size()>=1){
+            //如果需要查询游戏的tag，调用viewTag(Integer id)查询
+            if (ro.isNeedTag()){
+                List<List<TagEntity>> gameTagList = new ArrayList<>();
+                for (GamesEntity gamesEntity : gamesEntityList){
+                    gameTagList.add(viewTag(gamesEntity.getId()));
+                }
+                retJson.put("tagList",gameTagList);
+            }
             retJson.put("GameList",gamesEntityList);
         }
 
         return retJson;
+    }
+
+    //根据游戏id查询其tag
+    public List<TagEntity> viewTag(Integer id) {
+        QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
+        tagMapEntityQueryWrapper
+                .eq("game_id",id);
+        List<TagMapEntity> tagMapEntityList = tagMapMapper.selectList(tagMapEntityQueryWrapper);
+        if (tagMapEntityList.size()!=0){
+            //提取tagMapEntityList中tagId字段作为一个新列表
+            List<Integer> tagIdList = tagMapEntityList.stream().map(TagMapEntity::getTagId).collect(Collectors.toList());
+            //根据tagId列表批量查询
+            return tagMapper.selectBatchIds(tagIdList);
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     @Override
