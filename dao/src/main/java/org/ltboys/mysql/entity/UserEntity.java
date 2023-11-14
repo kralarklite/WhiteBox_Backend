@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @TableName("user")
 public class UserEntity {
@@ -15,9 +17,19 @@ public class UserEntity {
 
     private String password;
 
-    private String user_name;
+    private String userName;
 
     private String icon;
 
     private Integer sex;
+
+    private Date createdAt;
+
+    private Date lastLoginAt;
+
+    private Date birthday;
+
+    private Integer phoneNumber;
+
+    private Integer flag;
 }
