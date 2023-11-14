@@ -1,4 +1,4 @@
-package org.ltboys.advice;
+package org.ltboys.aop.advice;
 
 import org.ltboys.action.ActionResult;
 import lombok.extern.slf4j.Slf4j;

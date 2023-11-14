@@ -9,4 +9,6 @@ public class TagMapEntity {
     private Integer tagId;
 
     private Integer gameId;
+
+    private Integer flag;
 }

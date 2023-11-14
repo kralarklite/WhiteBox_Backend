@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class GamesServiceImpl  implements GamesService {
+public class GamesServiceImpl implements GamesService {
 
     @Autowired
     private GamesMapper gamesMapper;
@@ -39,7 +39,9 @@ public class GamesServiceImpl  implements GamesService {
         JSONObject retJson = new JSONObject();
 
         QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
-        gamesEntityQueryWrapper.eq("id",ro.getId());
+        gamesEntityQueryWrapper
+                .eq("id",ro.getId())
+                .eq("flag",1);
         gamesEntityQueryWrapper
                 .select("id","name","cover","`desc`","publisher","score","release_time");
         List<Map<String , Object>> viewGameList = gamesMapper.selectMaps(gamesEntityQueryWrapper);
@@ -53,7 +55,8 @@ public class GamesServiceImpl  implements GamesService {
 
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
         tagMapEntityQueryWrapper
-                .eq("game_id",ro.getId());
+                .eq("game_id",ro.getId())
+                .eq("flag",1);
         List<TagMapEntity> tagMapEntityList = tagMapMapper.selectList(tagMapEntityQueryWrapper);
         if (tagMapEntityList.size()!=0){
             //提取tagMapEntityList中tagId字段作为一个新列表
@@ -77,6 +80,8 @@ public class GamesServiceImpl  implements GamesService {
         QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
 
+        gamesEntityQueryWrapper.eq("flag",1);
+
         //根据游戏名查询
         if (!Objects.equals(ro.getName(), "")){
             gamesEntityQueryWrapper.like("name",ro.getName());
@@ -93,7 +98,9 @@ public class GamesServiceImpl  implements GamesService {
         //根据tag查询
         Integer tagId = ro.getTagId();
         if (!Objects.equals(tagId, 0)){
-            tagMapEntityQueryWrapper.eq("tag_id",tagId);
+            tagMapEntityQueryWrapper
+                    .eq("tag_id",tagId)
+                    .eq("flag",1);
             if (tagMapMapper.exists(tagMapEntityQueryWrapper)){
                 List<Integer> gameIdList = tagMapMapper.selectList(tagMapEntityQueryWrapper).stream().map(TagMapEntity::getGameId).collect(Collectors.toList());
                 gamesEntityQueryWrapper.in("id",gameIdList);
@@ -113,7 +120,6 @@ public class GamesServiceImpl  implements GamesService {
             }
         }
 */
-
         //分页查询
         int limit = ro.getLimit();
         int page = ro.getPage();
@@ -140,11 +146,13 @@ public class GamesServiceImpl  implements GamesService {
         return retJson;
     }
 
+
     //根据游戏id查询其tag
     public List<TagEntity> viewTag(Integer id) {
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
         tagMapEntityQueryWrapper
-                .eq("game_id",id);
+                .eq("game_id",id)
+                .eq("flag",1);
         List<TagMapEntity> tagMapEntityList = tagMapMapper.selectList(tagMapEntityQueryWrapper);
         if (tagMapEntityList.size()!=0){
             //提取tagMapEntityList中tagId字段作为一个新列表
