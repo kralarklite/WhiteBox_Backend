@@ -17,6 +17,12 @@ public class PictureController {
     @Autowired
     private PictureService pictureService;
 
+    /**
+     * 把前端传来的图片存储并获得其url
+     * @param str
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/save")
     public ActionResult savePicture (@RequestBody @Validated String str) throws Exception{
 
