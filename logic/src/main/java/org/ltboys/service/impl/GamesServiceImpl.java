@@ -48,7 +48,7 @@ public class GamesServiceImpl implements GamesService {
         //List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
 
         if (viewGameList.size()!=1){
-            retJson.put("retCode","9999");
+            retJson.put("retCode","9000");
             retJson.put("retMsg","game数据异常");
             return retJson;
         }
@@ -105,7 +105,7 @@ public class GamesServiceImpl implements GamesService {
                 List<Integer> gameIdList = tagMapMapper.selectList(tagMapEntityQueryWrapper).stream().map(TagMapEntity::getGameId).collect(Collectors.toList());
                 gamesEntityQueryWrapper.in("id",gameIdList);
             } else {
-                retJson.put("retCode","9999");
+                retJson.put("retCode","9001");
                 retJson.put("retMsg","该标签无游戏");
                 return retJson;
             }
