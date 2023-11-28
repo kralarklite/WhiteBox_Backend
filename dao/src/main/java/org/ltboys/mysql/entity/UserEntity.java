@@ -23,6 +23,8 @@ public class UserEntity {
 
     private Integer sex;
 
+    private String profile;
+
     private Date createdAt;
 
     private Date lastLoginAt;
@@ -32,4 +34,6 @@ public class UserEntity {
     private Integer phoneNumber;
 
     private Integer flag;
+
+    private Date banUntil;
 }
