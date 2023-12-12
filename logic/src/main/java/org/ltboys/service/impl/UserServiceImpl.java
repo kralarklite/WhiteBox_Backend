@@ -7,8 +7,10 @@ import org.ltboys.context.utils.JwtUtil;
 import org.ltboys.dto.ro.LoginRo;
 import org.ltboys.dto.ro.RegisterRo;
 import org.ltboys.mysql.entity.ArticleEntity;
+import org.ltboys.mysql.entity.CommentEntity;
 import org.ltboys.mysql.entity.UserEntity;
 import org.ltboys.mysql.mapper.ArticleMapper;
+import org.ltboys.mysql.mapper.CommentMapper;
 import org.ltboys.mysql.mapper.UserMapper;
 import org.ltboys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ArticleMapper articleMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
 
     @Override
@@ -150,7 +155,9 @@ public class UserServiceImpl implements UserService {
         JSONObject retJson = new JSONObject();
 
         QueryWrapper<ArticleEntity> articleEntityQueryWrapper = new QueryWrapper<>();
-        articleEntityQueryWrapper.eq("user_id",getUserId(token));
+        articleEntityQueryWrapper
+                .eq("user_id",getUserId(token))
+                .eq("flag",1);
         List<ArticleEntity> articleEntityList = articleMapper.selectList(articleEntityQueryWrapper);
         retJson.put("articles",articleEntityList);
         return retJson;
@@ -161,6 +168,12 @@ public class UserServiceImpl implements UserService {
 
         JSONObject retJson = new JSONObject();
 
-        return null;
+        QueryWrapper<CommentEntity> commentEntityQueryWrapper = new QueryWrapper<>();
+        commentEntityQueryWrapper
+                .eq("user_id",getUserId(token))
+                .eq("flag",1);
+        List<CommentEntity> commentEntityList = commentMapper.selectList(commentEntityQueryWrapper);
+        retJson.put("comments",commentEntityList);
+        return retJson;
     }
 }

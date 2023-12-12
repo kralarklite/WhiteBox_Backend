@@ -62,10 +62,11 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/homepage")
-    public ActionResult homepage() throws Exception {
+    public ActionResult homepage(@RequestHeader("token") @Validated String token) throws Exception {
         //String token = getRequest().getHeader("token");
         try {
-            JSONObject vo = userService.homepage(getRequest().getHeader("token"));
+            //JSONObject vo = userService.homepage(getRequest().getHeader("token"));
+            JSONObject vo = userService.homepage(token);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -79,9 +80,9 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/myarticles")
-    public ActionResult myArticles() throws Exception {
+    public ActionResult myArticles(@RequestHeader("token") @Validated String token) throws Exception {
         try {
-            JSONObject vo = userService.myArticles(getRequest().getHeader("token"));
+            JSONObject vo = userService.myArticles(token);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -95,9 +96,9 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/mycomments")
-    public ActionResult myComments() throws Exception {
+    public ActionResult myComments(@RequestHeader("token") @Validated String token) throws Exception {
         try {
-            JSONObject vo = userService.myComments(getRequest().getHeader("token"));
+            JSONObject vo = userService.myComments(token);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());

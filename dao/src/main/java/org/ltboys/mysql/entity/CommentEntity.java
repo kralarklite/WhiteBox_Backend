@@ -12,8 +12,15 @@ import java.util.Date;
 @TableName("comment")
 public class CommentEntity {
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Integer commentId;
 
-    private String name;
+    private Integer userId;
 
+    private Integer articleId;
+
+    private Date commentDate;
+
+    private String commentContent;
+
+    private Integer flag;
 }
