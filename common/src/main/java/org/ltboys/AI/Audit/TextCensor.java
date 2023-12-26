@@ -1,6 +1,6 @@
 package org.ltboys.AI.Audit;
 
-import org.ltboys.context.utils.HttpUtil;
+import org.ltboys.AI.Audit.HttpUtil;
 
 import java.net.URLEncoder;
 
