@@ -21,11 +21,13 @@ public class ArticleEntity {
 
     private String picture;
 
-    private String views;
+    private Integer views;
 
     private Date releaseTime;
 
     private Integer gameId;
 
     private Integer flag;
+
+    private Integer classification;
 }
