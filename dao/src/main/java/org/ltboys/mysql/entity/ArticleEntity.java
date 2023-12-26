@@ -1,7 +1,6 @@
 package org.ltboys.mysql.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -9,18 +8,24 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("comment")
-public class CommentEntity {
+@TableName("article")
+public class ArticleEntity {
     @TableId(type = IdType.AUTO)
-    private Integer commentId;
+    private Integer articleId;
 
     private Integer userId;
 
-    private Integer articleId;
+    private String title;
 
-    private Date commentDate;
+    private String content;
 
-    private String commentContent;
+    private String picture;
+
+    private String views;
+
+    private Date releaseTime;
+
+    private Integer gameId;
 
     private Integer flag;
 }

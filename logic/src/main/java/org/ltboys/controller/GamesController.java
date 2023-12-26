@@ -42,7 +42,7 @@ public class GamesController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/gettags")
+    @GetMapping("/gettags")
     public ActionResult getTags () throws Exception {
         try {
             JSONObject vo = gamesService.getTags();

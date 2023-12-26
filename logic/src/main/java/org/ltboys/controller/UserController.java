@@ -35,7 +35,7 @@ public class UserController {
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ActionResult.failure("查询游戏失败");
+            return ActionResult.failure("注册失败");
         }
     }
 
@@ -52,19 +52,57 @@ public class UserController {
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ActionResult.failure("查询游戏失败");
+            return ActionResult.failure("登录失败");
         }
     }
 
-    @PostMapping("/homepage")
-    public ActionResult homepage() throws Exception {
-        String token = getRequest().getHeader("token");
+    /**
+     * 个人主页
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/homepage")
+    public ActionResult homepage(@RequestHeader("token") @Validated String token) throws Exception {
+        //String token = getRequest().getHeader("token");
         try {
+            //JSONObject vo = userService.homepage(getRequest().getHeader("token"));
             JSONObject vo = userService.homepage(token);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ActionResult.failure("查询游戏失败");
+            return ActionResult.failure("error");
+        }
+    }
+
+    /**
+     * 查询个人文章
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/myarticles")
+    public ActionResult myArticles(@RequestHeader("token") @Validated String token) throws Exception {
+        try {
+            JSONObject vo = userService.myArticles(token);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("error");
+        }
+    }
+
+    /**
+     * 查询个人评论
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/mycomments")
+    public ActionResult myComments(@RequestHeader("token") @Validated String token) throws Exception {
+        try {
+            JSONObject vo = userService.myComments(token);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("error");
         }
     }
 }
