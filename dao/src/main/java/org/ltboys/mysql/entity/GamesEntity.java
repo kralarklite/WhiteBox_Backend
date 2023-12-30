@@ -9,7 +9,9 @@ import lombok.Data;
 
 import java.util.Date;
 
-
+/**
+ * @author kralarklite
+ */
 @Data
 @TableName("games")
 public class GamesEntity {

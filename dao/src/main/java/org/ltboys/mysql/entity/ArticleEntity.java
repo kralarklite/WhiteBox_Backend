@@ -7,6 +7,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @author kralarklite
+ */
 @Data
 @TableName("article")
 public class ArticleEntity {

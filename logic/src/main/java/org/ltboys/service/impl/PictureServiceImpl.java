@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.ltboys.service.PictureService;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author kralarklite
+ */
 @Slf4j
 @Service
 public class PictureServiceImpl  implements PictureService {

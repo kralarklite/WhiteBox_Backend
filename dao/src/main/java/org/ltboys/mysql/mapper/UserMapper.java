@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.ltboys.mysql.entity.UserEntity;
 
+/**
+ * @author kralarklite
+ */
 @Mapper
 @DS("mysql")
 public interface UserMapper extends BaseMapper<UserEntity> {

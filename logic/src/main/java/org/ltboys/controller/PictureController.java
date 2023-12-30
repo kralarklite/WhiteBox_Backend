@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author kralarklite
+ */
 @Slf4j
 @RestController
 @CrossOrigin(origins = "*")

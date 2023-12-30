@@ -7,6 +7,9 @@ import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryArticlesRo;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author kralarklite
+ */
 @Service
 public interface ArticleService {
 

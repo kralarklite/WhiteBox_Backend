@@ -9,7 +9,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-
+/**
+ * @author kralarklite
+ */
 @Mapper
 @DS("mysql")
 public interface GamesMapper extends BaseMapper<GamesEntity> {

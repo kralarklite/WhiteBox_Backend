@@ -11,6 +11,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import java.util.Locale;
 
+/**
+ * @author kralarklite
+ */
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
 

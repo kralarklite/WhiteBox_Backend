@@ -8,6 +8,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @author kralarklite
+ */
 @Data
 @TableName("comment")
 public class CommentEntity {

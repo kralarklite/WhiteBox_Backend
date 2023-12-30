@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import static org.ltboys.context.utils.TokenUtil.getRequest;
 
+/**
+ * @author kralarklite
+ */
 @Slf4j
 @RestController
 @CrossOrigin(origins = "*")

@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @author kralarklite
+ */
 @Data
 public class AddCommentRo {
     private Integer userId;

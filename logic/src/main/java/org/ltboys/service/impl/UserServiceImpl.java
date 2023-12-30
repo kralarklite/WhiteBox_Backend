@@ -23,6 +23,9 @@ import java.util.Map;
 
 import static org.ltboys.context.utils.JwtUtil.getUserId;
 
+/**
+ * @author kralarklite
+ */
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -120,6 +123,7 @@ public class UserServiceImpl implements UserService {
         String token = JwtUtil.sign(userEntity.getId().toString(),info.toString());
         retJson.put("retCode","0000");
         retJson.put("retMsg","登录成功");
+        retJson.put("userId",userEntity.getId());
         retJson.put("token",token);
         return retJson;
     }

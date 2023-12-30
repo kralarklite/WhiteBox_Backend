@@ -21,6 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author kralarklite
+ */
 @Slf4j
 @Service
 public class GamesServiceImpl implements GamesService {

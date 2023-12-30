@@ -5,6 +5,9 @@ import org.ltboys.dto.ro.LoginRo;
 import org.ltboys.dto.ro.RegisterRo;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author kralarklite
+ */
 @Service
 public interface UserService {
 
