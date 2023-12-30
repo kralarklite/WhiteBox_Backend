@@ -3,10 +3,14 @@ package org.ltboys.controller;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.action.ActionResult;
+import org.ltboys.dto.ro.PictureRo;
 import org.ltboys.service.PictureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
 
 /**
  * @author kralarklite
@@ -22,15 +26,15 @@ public class PictureController {
 
     /**
      * 把前端传来的图片存储并获得其url
-     * @param str
+     * @param ro
      * @return
      * @throws Exception
      */
     @PostMapping("/save")
-    public ActionResult savePicture (@RequestBody @Validated String str) throws Exception{
+    public ActionResult savePicture (@RequestParam("image") MultipartFile ro) throws Exception{
 
         try {
-            JSONObject vo = pictureService.savePicture(str);
+            JSONObject vo = pictureService.savePicture(ro);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
