@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,9 +84,10 @@ public class BaiduAuditUtils {
         return null;
     }
 
-    public static Boolean TextCensor(String param) {
+    public static List<Object> TextCensor(String param) {
         // 请求url
         String url = "https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined";
+        List<Object> list = new ArrayList<>();
         try {
             // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
             String accessToken = getAuth();
@@ -96,12 +98,24 @@ public class BaiduAuditUtils {
             JSONObject jsonObject = JSONObject.parseObject(result);
             String conclusion = jsonObject.getString("conclusion");
             if ("合规".equals(conclusion)) {
-                return true;
+                list.add(true);
+            } else {
+                list.add(false);
+                list.add(jsonObject.getJSONArray("data").get(0));
+                //                List<Object> list = JSONObject.parseArray(jsonObject.getString("data"));
+//                JSONObject newJsonObject = (JSONObject) JSONObject.parseArray(jsonObject.getString("data")).get(0);
+//                System.out.println("这是else打印的list");
+//                System.out.println(list);
+//                System.out.println("这是else打印的newJsonObject");
+//                System.out.println(newJsonObject);
+//                System.out.println("这是else打印的class");
+//                System.out.println(list.get(0).getClass());
             }
+            return list;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return list;
     }
 
     /**
@@ -132,12 +146,15 @@ public class BaiduAuditUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(BaiduAuditUtils.getAuth());
-        System.out.println(BaiduAuditUtils.TextCensor("操"));
-        System.out.println(BaiduAuditUtils.TextCensor("cnm"));
-        System.out.println(BaiduAuditUtils.TextCensor("sb"));
-        System.out.println(BaiduAuditUtils.TextCensor("牛逼"));
-        System.out.println(BaiduAuditUtils.TextCensor("日寇"));
-        System.out.println(BaiduAuditUtils.TextCensor("公司"));
+// System.out.println(BaiduAuditUtils.getAuth());
+// System.out.println(BaiduAuditUtils.TextCensor("操"));
+// System.out.println(BaiduAuditUtils.TextCensor("cnm"));
+// System.out.println(BaiduAuditUtils.TextCensor("sb"));
+// System.out.println(BaiduAuditUtils.TextCensor("牛逼"));
+// System.out.println(BaiduAuditUtils.TextCensor("日寇"));
+// System.out.println(BaiduAuditUtils.TextCensor("公司"));
+//        System.out.println(BaiduAuditUtils.TextCensor("操"));
+//        System.out.println("-");
+        System.out.println(BaiduAuditUtils.TextCensor("草泥马"));
     }
 }
