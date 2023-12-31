@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.AI.Audit.BaiduAuditUtils;
+import org.ltboys.aop.exception.TokenException;
 import org.ltboys.dto.ro.AddArticleRo;
 import org.ltboys.dto.ro.AddCommentRo;
 import org.ltboys.dto.ro.IdRo;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+
+import static org.ltboys.context.utils.JwtUtil.checkUserId;
 
 /**
  * @author kralarklite
@@ -93,8 +96,13 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public JSONObject addArticle(AddArticleRo ro) throws Exception {
+    public JSONObject addArticle(String token, AddArticleRo ro) throws Exception {
+
+        //校验token信息与ro是否一致
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("用户身份非法，请重新登录");
+
         JSONObject retJson = new JSONObject();
+
 
         //判断是否违规
         if (judgement(retJson, BaiduAuditUtils.TextCensor(ro.getTitle()))) {
@@ -130,7 +138,11 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public JSONObject addComment(AddCommentRo ro) throws Exception {
+    public JSONObject addComment(String token, AddCommentRo ro) throws Exception {
+
+        //校验token信息与ro是否一致
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("用户身份非法，请重新登录");
+
         JSONObject retJson = new JSONObject();
 
         //判断是否违规
@@ -168,11 +180,11 @@ public class ArticleServiceImpl implements ArticleService {
     private static boolean judgement(JSONObject retJson, List<Object> list) {
         if (list.size()==0){
             retJson.put("retCode","9400");
-            retJson.put("retMsg","评论失败");
+            retJson.put("retMsg","发布内容失败");
             return true;
         } else if (!(Boolean)list.get(0) && list.size()==1) {
             retJson.put("retCode","9400");
-            retJson.put("retMsg","评论失败");
+            retJson.put("retMsg","发布内容失败");
             return true;
         } else if (!(Boolean)list.get(0) && list.size()==2) {
             retJson.put("retCode","9401");
@@ -182,7 +194,7 @@ public class ArticleServiceImpl implements ArticleService {
                 retJson.put("wordHitPositions",jsonObject.getJSONArray("hits").getJSONObject(0).getJSONArray("wordHitPositions"));
                 return true;
             } catch (Exception e) {
-                retJson.put("retMsg","评论违规");
+                retJson.put("retMsg","发布内容违规");
                 return true;
             }
         }

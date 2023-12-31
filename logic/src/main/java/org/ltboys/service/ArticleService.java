@@ -38,17 +38,21 @@ public interface ArticleService {
 
     /**
      * 用户上传文章
+     *
+     * @param token
      * @param ro
      * @return
      * @throws Exception
      */
-    JSONObject addArticle(AddArticleRo ro) throws Exception;
+    JSONObject addArticle(String token, AddArticleRo ro) throws Exception;
 
     /**
      * 用户上传评论
+     *
+     * @param token
      * @param ro
      * @return
      * @throws Exception
      */
-    JSONObject addComment(AddCommentRo ro) throws Exception;
+    JSONObject addComment(String token, AddCommentRo ro) throws Exception;
 }
