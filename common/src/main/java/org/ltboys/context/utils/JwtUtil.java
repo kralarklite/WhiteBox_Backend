@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import org.ltboys.aop.exception.TokenException;
 
 import java.util.Date;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class JwtUtil {
     private static final String SECRET = "jwt_secret";
 
     /**
-     * 生成jwt字符串，五分钟后过期  JWT(json web token)
+     * 生成jwt字符串，一星期后过期  JWT(json web token)
      * @param userId
      * @param info,Map的value只能存放值的类型为：Map，List，Boolean，Integer，Long，Double，String and Date
      * @return
@@ -87,7 +88,7 @@ public class JwtUtil {
             verifier.verify(token);
             return true;
         }catch (JWTVerificationException e) {
-            throw new RuntimeException("token 无效，请重新获取");
+            throw new TokenException("token 无效，请重新获取");
         }
     }
 }
