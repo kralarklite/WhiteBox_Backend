@@ -11,8 +11,10 @@ import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryArticlesRo;
 import org.ltboys.mysql.entity.ArticleEntity;
 import org.ltboys.mysql.entity.CommentEntity;
+import org.ltboys.mysql.entity.UserEntity;
 import org.ltboys.mysql.mapper.ArticleMapper;
 import org.ltboys.mysql.mapper.CommentMapper;
+import org.ltboys.mysql.mapper.UserMapper;
 import org.ltboys.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,9 @@ import static org.ltboys.context.utils.JwtUtil.checkUserId;
 @Slf4j
 @Service
 public class ArticleServiceImpl implements ArticleService {
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -105,10 +110,16 @@ public class ArticleServiceImpl implements ArticleService {
     public JSONObject addArticle(String token, AddArticleRo ro) throws Exception {
 
         //校验token信息与ro是否一致
-        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("用户身份非法，请重新登录");
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
 
         JSONObject retJson = new JSONObject();
 
+        //校验用户是否存在及封禁
+        if (verify_user(ro.getUserId())) {
+            retJson.put("retCode","9900");
+            retJson.put("retMsg","用户状态异常");
+            return retJson;
+        }
 
         //判断是否违规
         if (judgement(retJson, BaiduAuditUtils.TextCensor(ro.getTitle()))) {
@@ -165,9 +176,16 @@ public class ArticleServiceImpl implements ArticleService {
     public JSONObject addComment(String token, AddCommentRo ro) throws Exception {
 
         //校验token信息与ro是否一致
-        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("用户身份非法，请重新登录");
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
 
         JSONObject retJson = new JSONObject();
+
+        //校验用户是否存在及封禁
+        if (verify_user(ro.getUserId())) {
+            retJson.put("retCode","9900");
+            retJson.put("retMsg","用户状态异常");
+            return retJson;
+        }
 
         //判断是否违规
         List<Object> list = BaiduAuditUtils.TextCensor(ro.getCommentContent());
@@ -223,6 +241,21 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
         return false;
+    }
+
+    //校验用户是否存在及封禁
+    private boolean verify_user(Integer userId) {
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id",userId);
+
+        //查询账号是否存在
+        if (!userMapper.exists(userEntityQueryWrapper)){
+            return true;
+        }
+
+        //查询账号封禁状态
+        userEntityQueryWrapper.eq("flag", 1);
+        return !userMapper.exists(userEntityQueryWrapper);
     }
 
 }

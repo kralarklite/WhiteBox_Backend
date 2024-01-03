@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
         int fact = userMapper.insert(userEntity);
 
         if(fact != 1){
-            retJson.put("retCode","9900");
+            retJson.put("retCode","9906");
             retJson.put("retMsg","注册失败");
             return retJson;
         }
@@ -144,6 +144,14 @@ public class UserServiceImpl implements UserService {
             return retJson;
         }
 
+        //查询账号封禁状态
+        userEntityQueryWrapper.eq("flag", 1);
+        if (!userMapper.exists(userEntityQueryWrapper)) {
+            retJson.put("retCode","9904");
+            retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
+            return retJson;
+        }
+
         userEntityQueryWrapper.select("user_name","icon","sex","profile","birthday","phone_number");
 
         List<Map<String , Object>> mapList = userMapper.selectMaps(userEntityQueryWrapper);
@@ -158,6 +166,24 @@ public class UserServiceImpl implements UserService {
 
         JSONObject retJson = new JSONObject();
 
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id",getUserId(token));
+
+        //查询账号是否存在
+        if (!userMapper.exists(userEntityQueryWrapper)){
+            retJson.put("retCode","9902");
+            retJson.put("retMsg","用户不存在");
+            return retJson;
+        }
+
+        //查询账号封禁状态
+        userEntityQueryWrapper.eq("flag", 1);
+        if (!userMapper.exists(userEntityQueryWrapper)) {
+            retJson.put("retCode","9904");
+            retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
+            return retJson;
+        }
+
         QueryWrapper<ArticleEntity> articleEntityQueryWrapper = new QueryWrapper<>();
         articleEntityQueryWrapper
                 .eq("user_id",getUserId(token))
@@ -171,6 +197,24 @@ public class UserServiceImpl implements UserService {
     public JSONObject myComments(String token) throws Exception {
 
         JSONObject retJson = new JSONObject();
+
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id",getUserId(token));
+
+        //查询账号是否存在
+        if (!userMapper.exists(userEntityQueryWrapper)){
+            retJson.put("retCode","9902");
+            retJson.put("retMsg","用户不存在");
+            return retJson;
+        }
+
+        //查询账号封禁状态
+        userEntityQueryWrapper.eq("flag", 1);
+        if (!userMapper.exists(userEntityQueryWrapper)) {
+            retJson.put("retCode","9904");
+            retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
+            return retJson;
+        }
 
         QueryWrapper<CommentEntity> commentEntityQueryWrapper = new QueryWrapper<>();
         commentEntityQueryWrapper
