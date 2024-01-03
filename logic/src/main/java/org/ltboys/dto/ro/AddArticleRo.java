@@ -13,7 +13,7 @@ public class AddArticleRo {
 
     private String content;
 
-    private String picture;
+    //private String picture;
 
     private Integer gameId;
 

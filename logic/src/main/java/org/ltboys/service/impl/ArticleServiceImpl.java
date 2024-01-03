@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.ltboys.context.utils.JwtUtil.checkUserId;
 
@@ -41,6 +43,10 @@ public class ArticleServiceImpl implements ArticleService {
         JSONObject retJson = new JSONObject();
 
         QueryWrapper<ArticleEntity> articleEntityQueryWrapper = new QueryWrapper<>();
+
+        if (ro.getGameId()!=0) {
+            articleEntityQueryWrapper.eq("game_id",ro.getGameId());
+        }
 
         if (ro.getClassification()==1 || ro.getClassification()==2 || ro.getClassification()==3){
             articleEntityQueryWrapper.eq("classification",ro.getClassification());
@@ -118,10 +124,28 @@ public class ArticleServiceImpl implements ArticleService {
         articleEntity.setUserId(ro.getUserId());
         articleEntity.setTitle(ro.getTitle());
         articleEntity.setContent(ro.getContent());
-        articleEntity.setPicture(ro.getPicture());
+        //articleEntity.setPicture(ro.getPicture());
         articleEntity.setClassification(ro.getClassification());
         articleEntity.setGameId(ro.getGameId());
         articleEntity.setReleaseTime(new Date());
+
+        //用正则表达式从文本中提取图片的url，文本中图片的格式为！[filename](url)
+        String pattern = "(!\\[(.*?)\\]\\((.*?)\\))";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(ro.getContent());
+        int count = 0;
+        StringBuilder picture = new StringBuilder();
+        while (m.find()) {
+            String match = m.group(3); // 提取第三个捕获组中的内容
+//            String fileName = m.group(2); // 提取第二个捕获组中的内容
+            picture.append(match);
+            count++;
+            if (count >= 3) {
+                break;
+            }
+            picture.append(' ');
+        }
+        articleEntity.setPicture(picture.toString());
 
         int fact = articleMapper.insert(articleEntity);
 
