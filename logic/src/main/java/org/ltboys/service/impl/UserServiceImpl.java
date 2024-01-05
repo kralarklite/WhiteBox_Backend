@@ -3,9 +3,13 @@ package org.ltboys.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.ltboys.aop.exception.TokenException;
 import org.ltboys.context.utils.JwtUtil;
+import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.LoginRo;
 import org.ltboys.dto.ro.RegisterRo;
+import org.ltboys.dto.ro.UpdateUserRo;
+import org.ltboys.dto.vo.UserBriefVo;
 import org.ltboys.mysql.entity.ArticleEntity;
 import org.ltboys.mysql.entity.CommentEntity;
 import org.ltboys.mysql.entity.UserEntity;
@@ -17,10 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.ltboys.context.utils.JwtUtil.checkUserId;
 import static org.ltboys.context.utils.JwtUtil.getUserId;
 
 /**
@@ -222,6 +226,84 @@ public class UserServiceImpl implements UserService {
                 .eq("flag",1);
         List<CommentEntity> commentEntityList = commentMapper.selectList(commentEntityQueryWrapper);
         retJson.put("comments",commentEntityList);
+        return retJson;
+    }
+
+    @Override
+    public JSONObject brief(IdRo ro) throws Exception {
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper
+                .eq("id", ro.getId())
+                .select("user_name","icon","sex");
+
+        //List<Object> objectList = userMapper.selectObjs(userEntityQueryWrapper);
+
+        //如果selectOne查询的目标不存在会将null赋给userEntity，导致在调用其get方法时报NullPointerException，因此使用selectList
+//        UserEntity userEntity = userMapper.selectOne(userEntityQueryWrapper);
+//        UserBriefVo vo = new UserBriefVo();
+//        try {
+//            vo.setUserName(userEntity.getUserName());
+//            vo.setIcon(userEntity.getIcon());
+//            vo.setSex(userEntity.getSex());
+//        } catch (NullPointerException nullPointerException) {
+//            retJson.put("retCode","9902");
+//            retJson.put("retMsg","用户不存在");
+//            return retJson;
+//        }
+        List<UserEntity> userEntityList = userMapper.selectList(userEntityQueryWrapper);
+        if (userEntityList.size()==0) {
+            retJson.put("retCode","9902");
+            retJson.put("retMsg","用户不存在");
+            return retJson;
+        }
+        UserEntity userEntity = userEntityList.get(0);
+        UserBriefVo vo = new UserBriefVo();
+        vo.setUserName(userEntity.getUserName());
+        vo.setIcon(userEntity.getIcon());
+        vo.setSex(userEntity.getSex());
+
+        retJson.put("user",vo);
+
+        return retJson;
+    }
+
+    @Override
+    public JSONObject updateUser(String token, UpdateUserRo ro) throws Exception {
+
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id",ro.getUserId())
+                .eq("flag",1);
+
+        if (!userMapper.exists(userEntityQueryWrapper)) {
+            retJson.put("retCode","9900");
+            retJson.put("retMsg","用户状态异常");
+            return retJson;
+        }
+
+        UserEntity updatePara = new UserEntity();
+        updatePara.setUserName(ro.getUserName());
+        updatePara.setIcon(ro.getIcon());
+        updatePara.setSex(ro.getSex());
+        updatePara.setProfile(ro.getProfile());
+        updatePara.setBirthday(ro.getBirthday());
+        updatePara.setPhoneNumber(ro.getPhoneNumber());
+
+        int fact = userMapper.update(updatePara,userEntityQueryWrapper);
+        if (fact!=1) {
+            retJson.put("retCode","9907");
+            retJson.put("retMsg","修改用户信息失败");
+            return retJson;
+        }
+
+        retJson.put("retCode","0000");
+        retJson.put("retMsg","修改用户信息成功");
         return retJson;
     }
 }

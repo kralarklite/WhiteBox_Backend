@@ -25,6 +25,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor())
                 .addPathPatterns(
                         "/user/homepage",
+                        "/user/updateuser",
                         "/user/myarticles",
                         "/user/mycomments",
                         "/information/addarticle",

@@ -1,7 +1,9 @@
 package org.ltboys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.AI.Audit.BaiduAuditUtils;
 import org.ltboys.aop.exception.TokenException;
@@ -9,6 +11,7 @@ import org.ltboys.dto.ro.AddArticleRo;
 import org.ltboys.dto.ro.AddCommentRo;
 import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryArticlesRo;
+import org.ltboys.dto.vo.UserBriefVo;
 import org.ltboys.mysql.entity.ArticleEntity;
 import org.ltboys.mysql.entity.CommentEntity;
 import org.ltboys.mysql.entity.UserEntity;
@@ -19,10 +22,14 @@ import org.ltboys.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.ltboys.context.utils.JwtUtil.checkUserId;
 
@@ -50,7 +57,11 @@ public class ArticleServiceImpl implements ArticleService {
         QueryWrapper<ArticleEntity> articleEntityQueryWrapper = new QueryWrapper<>();
 
         if (ro.getGameId()!=0) {
-            articleEntityQueryWrapper.eq("game_id",ro.getGameId());
+            int limit = 5;
+            String limit_sql = "LIMIT " + limit;
+            articleEntityQueryWrapper.eq("game_id",ro.getGameId())
+                    .orderByDesc("views")
+                    .last(limit_sql);
         }
 
         if (ro.getClassification()==1 || ro.getClassification()==2 || ro.getClassification()==3){
@@ -72,7 +83,8 @@ public class ArticleServiceImpl implements ArticleService {
         JSONObject retJson = new JSONObject();
 
         QueryWrapper<ArticleEntity> articleEntityQueryWrapper = new QueryWrapper<>();
-        articleEntityQueryWrapper.eq("article_id",ro.getId());
+        articleEntityQueryWrapper.eq("article_id",ro.getId())
+                .eq("flag",1);
 
         if (!articleMapper.exists(articleEntityQueryWrapper)) {
             retJson.put("retCode","9301");
@@ -100,8 +112,28 @@ public class ArticleServiceImpl implements ArticleService {
     public JSONObject queryComments(IdRo ro) throws Exception {
         JSONObject retJson = new JSONObject();
         QueryWrapper<CommentEntity> commentEntityQueryWrapper = new QueryWrapper<>();
-        commentEntityQueryWrapper.eq("article_id",ro.getId());
+        commentEntityQueryWrapper.eq("article_id",ro.getId())
+                .eq("flag",1);
         List<CommentEntity> commentEntityList = commentMapper.selectList(commentEntityQueryWrapper);
+
+        if (commentEntityList.size()!=0) {
+            List<Integer> userIdList = commentEntityList.stream().map(CommentEntity::getUserId).collect(Collectors.toList());
+            //注释掉的两行代码会自动去除查询到的重复信息
+            //List<UserEntity> userEntityList = new LambdaQueryChainWrapper<>(userMapper).in(UserEntity::getId,userIdList).groupBy(UserEntity::getId).list();
+            //List<UserEntity> list = userMapper.selectBatchIds(userIdList);
+            List<UserEntity> userEntityList = new ArrayList<>();
+            for (Integer userId :userIdList) {
+                UserEntity userEntity = userMapper.selectById(userId);
+                if (userEntity == null) {
+                    retJson.put("retCode","9300");
+                    retJson.put("retMsg","error");
+                    return retJson;
+                } else userEntityList.add(userEntity);
+            }
+            List<UserBriefVo> mapList = userEntityList.stream().map(userEntity -> new UserBriefVo(userEntity.getUserName(),userEntity.getIcon(),userEntity.getSex())).collect(Collectors.toList());
+            retJson.put("userBriefList",mapList);
+        }
+
         retJson.put("commentEntityList",commentEntityList);
         return retJson;
     }

@@ -106,7 +106,7 @@ public class ArticleController {
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ActionResult.failure("查询文章失败");
+            return ActionResult.failure("上传评论失败");
         }
     }
 
