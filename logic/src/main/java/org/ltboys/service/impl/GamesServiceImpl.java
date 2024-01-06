@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -221,7 +222,7 @@ public class GamesServiceImpl implements GamesService {
         QueryWrapper<GameStatisticEntity> gameStatisticEntityQueryWrapper = new QueryWrapper<>();
         gameStatisticEntityQueryWrapper
                 .eq("game_id", gameId)
-                .eq("stat_time", new Date());
+                .apply("DATE(stat_time) = {0}", LocalDate.now());
 
         int fact;
         if (gameStatisticMapper.exists(gameStatisticEntityQueryWrapper)) {
