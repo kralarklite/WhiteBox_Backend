@@ -2,6 +2,7 @@ package org.ltboys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
@@ -97,7 +98,8 @@ public class GamesServiceImpl implements GamesService {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -7);
             gameStatisticEntityQueryWrapper
-                    .ge("stat_time",calendar)
+                    //.ge("stat_time",calendar)
+                    .apply("DATE(stat_time) >= {0}", LocalDate.now().minusWeeks(1))
                     .eq("flag", 1)
                     .select("SUM(total) as total","game_id")
                     .groupBy("game_id")
@@ -106,7 +108,12 @@ public class GamesServiceImpl implements GamesService {
             List<Map<String,Object>> gameStatisticEntityList = gameStatisticMapper.selectMaps(gameStatisticEntityQueryWrapper);
             if (gameStatisticEntityList.size()!=0) {
                 List<Integer> gameIdList = gameStatisticEntityList.stream().map(map -> (Integer)map.get("game_id")).collect(Collectors.toList());
-                List<GamesEntity> gamesEntityList = gamesMapper.selectBatchIds(gameIdList);
+                //List<GamesEntity> gamesEntityList = gamesMapper.selectBatchIds(gameIdList);
+                gamesEntityQueryWrapper
+                        .in("id", gameIdList)
+                        .orderBy(true, true, "RAND()")
+                        .last("LIMIT " + ro.getLimit());
+                List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
                 retJson.put("GameList",gamesEntityList);
                 if (ro.isNeedTag()){
                     List<List<TagEntity>> gameTagList = new ArrayList<>();
