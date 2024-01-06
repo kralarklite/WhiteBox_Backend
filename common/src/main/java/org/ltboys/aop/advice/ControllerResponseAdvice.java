@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 /**
  * 请求返回时的输出标准化
  */
-@RestControllerAdvice("com.abchina.controller")
+@RestControllerAdvice("org.ltboys.controller")
 public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override

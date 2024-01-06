@@ -3,14 +3,10 @@ package org.ltboys.controller;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.action.ActionResult;
-import org.ltboys.dto.ro.PictureRo;
 import org.ltboys.service.PictureService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
 
 /**
  * @author kralarklite

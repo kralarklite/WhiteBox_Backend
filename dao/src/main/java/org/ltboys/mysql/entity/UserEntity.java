@@ -34,7 +34,7 @@ public class UserEntity {
 
     private Date birthday;
 
-    private Integer phoneNumber;
+    private String phoneNumber;
 
     private Integer flag;
 

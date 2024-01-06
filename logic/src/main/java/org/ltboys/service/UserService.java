@@ -1,8 +1,10 @@
 package org.ltboys.service;
 
 import com.alibaba.fastjson.JSONObject;
+import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.LoginRo;
 import org.ltboys.dto.ro.RegisterRo;
+import org.ltboys.dto.ro.UpdateUserRo;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,4 +52,21 @@ public interface UserService {
      * @throws Exception
      */
     JSONObject myComments(String token) throws Exception;
+
+    /**
+     * 查询用户名称、头像、性别
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject brief(IdRo ro) throws Exception;
+
+    /**
+     * 更改用户信息
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject updateUser(String token, UpdateUserRo ro) throws Exception;
 }

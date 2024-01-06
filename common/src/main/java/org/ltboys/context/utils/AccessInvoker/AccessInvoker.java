@@ -8,7 +8,7 @@ import java.util.Date;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.ltboys.context.utils.ABCAesHelper;
+import org.ltboys.context.utils.AesHelper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -69,12 +69,12 @@ public class AccessInvoker {
 //        	fin.close();
         	
         	//获取签名
-//        	ABCRsaHelper rsaHelper = new ABCRsaHelper();
+//        	RsaHelper rsaHelper = new RsaHelper();
 //        	rsaHelper.setPriKeyStr(priKeyStr);
 //        	String sign = rsaHelper.createSignWithPriKeyBySHA256(strNeedSign);
 			String sign = DigestUtils.md5Hex(strNeedSign);
         	//加密报文
-        	ABCAesHelper aesHelper = new ABCAesHelper();
+        	AesHelper aesHelper = new AesHelper();
         	aesHelper.setAesKey(cKey16);
         	String rqEncoded = aesHelper.encodeWithAES(rqJson);
         	//设置参数

@@ -84,7 +84,7 @@ public class ArticleController {
     @PostMapping("/addarticle")
     public ActionResult addArticle(@RequestHeader("token") @Validated String token,@RequestBody @Validated AddArticleRo ro) throws Exception {
         try {
-            JSONObject vo = articleService.addArticle(ro);
+            JSONObject vo = articleService.addArticle(token, ro);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -102,11 +102,11 @@ public class ArticleController {
     @PostMapping("/addcomment")
     public ActionResult addComment(@RequestHeader("token") @Validated String token,@RequestBody @Validated AddCommentRo ro) throws Exception {
         try {
-            JSONObject vo = articleService.addComment(ro);
+            JSONObject vo = articleService.addComment(token, ro);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ActionResult.failure("查询文章失败");
+            return ActionResult.failure("上传评论失败");
         }
     }
 

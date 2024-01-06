@@ -22,7 +22,7 @@ public class GatewayUtil {
     public JSONObject post(String url, String data) throws Exception{
         String randomKey = getRandomKey();
         String tmp = new StringBuffer(randomKey).reverse().toString();
-        ABCAesHelper helper = new ABCAesHelper();
+        AesHelper helper = new AesHelper();
         helper.setAesKey(tmp);
         String body = helper.encodeWithAES(data);
         JSONObject request = new JSONObject();

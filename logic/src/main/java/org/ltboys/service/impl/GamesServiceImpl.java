@@ -125,10 +125,12 @@ public class GamesServiceImpl implements GamesService {
 */
         //分页查询
         int limit = ro.getLimit();
-        int page = ro.getPage();
-        int offset = limit * (page - 1);
-        String limit_sql = "LIMIT " + limit + " OFFSET " + offset;
-        gamesEntityQueryWrapper.last(limit_sql);
+        if (limit!=0){
+            int page = ro.getPage();
+            int offset = limit * (page - 1);
+            String limit_sql = "LIMIT " + limit + " OFFSET " + offset;
+            gamesEntityQueryWrapper.last(limit_sql);
+        }
 
         gamesEntityQueryWrapper.orderByDesc("id");
 

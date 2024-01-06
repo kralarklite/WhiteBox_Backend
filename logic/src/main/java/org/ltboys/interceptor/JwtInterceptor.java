@@ -1,6 +1,7 @@
 package org.ltboys.interceptor;
 
 
+import org.ltboys.aop.exception.TokenException;
 import org.ltboys.context.utils.JwtUtil;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,7 +26,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         System.out.println("此处测试是否拿到了token：" + token);
 
         if (token == null) {
-            throw new RuntimeException("无 token ，请重新登陆");
+            throw new TokenException("无 token ，请重新登陆");
         }
 
         //验证 token

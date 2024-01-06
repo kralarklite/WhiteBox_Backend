@@ -8,4 +8,6 @@ import lombok.Data;
 @Data
 public class QueryArticlesRo {
     private Integer classification;
+
+    private Integer gameId;
 }

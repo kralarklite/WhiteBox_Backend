@@ -68,4 +68,12 @@ public class ActionResult<T> implements Serializable {
     public static ActionResult failure(String msg) {
         return new ActionResult(ResultCode.FAILURE, msg);
     }
+
+    public static ActionResult no_token() {
+        return new ActionResult(ResultCode.NO_TOKEN);
+    }
+
+    public static ActionResult no_token(String msg) {
+        return new ActionResult(ResultCode.NO_TOKEN, msg);
+    }
 }

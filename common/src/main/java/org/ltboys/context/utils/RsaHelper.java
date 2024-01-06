@@ -7,7 +7,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 
-public class ABCRsaHelper {
+public class RsaHelper {
 	private String priKeyStr;
 	private String pubKeyStr;
 

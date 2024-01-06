@@ -61,7 +61,7 @@ public class SmsUtil {
             String strNeedSign = input.getSendsite() + input.getId() + input.getReqtime() + input.getMethod() + cKey;
             String sign = DigestUtils.md5Hex(strNeedSign);
             //加密报文
-            ABCAesHelper aesHelper = new ABCAesHelper();
+            AesHelper aesHelper = new AesHelper();
             aesHelper.setAesKey(cKey16);
             String rqEncoded = aesHelper.encodeWithAES(rqJson);
             //设置参数

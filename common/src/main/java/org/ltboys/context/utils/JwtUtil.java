@@ -6,9 +6,11 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import org.ltboys.aop.exception.TokenException;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 public class JwtUtil {
     /**
@@ -22,7 +24,7 @@ public class JwtUtil {
     private static final String SECRET = "jwt_secret";
 
     /**
-     * 生成jwt字符串，五分钟后过期  JWT(json web token)
+     * 生成jwt字符串，一星期后过期  JWT(json web token)
      * @param userId
      * @param info,Map的value只能存放值的类型为：Map，List，Boolean，Integer，Long，Double，String and Date
      * @return
@@ -60,6 +62,15 @@ public class JwtUtil {
         }
     }
 
+    public static Boolean checkUserId(String token, String userId) {
+        try {
+            String checkUserId = JWT.decode(token).getAudience().get(0);
+            return Objects.equals(checkUserId, userId);
+        }catch (JWTDecodeException e) {
+            return false;
+        }
+    }
+
     /**
      * 根据token获取自定义数据info
      * @param token
@@ -78,16 +89,15 @@ public class JwtUtil {
      * @param token
      * @return
      * */
-    public static boolean checkSign(String token) {
+    public static void checkSign(String token) throws TokenException {
         try {
             Algorithm algorithm  = Algorithm.HMAC256(SECRET);
             JWTVerifier verifier = JWT.require(algorithm)
                     //.withClaim("username, username)
                     .build();
             verifier.verify(token);
-            return true;
         }catch (JWTVerificationException e) {
-            throw new RuntimeException("token 无效，请重新获取");
+            throw new TokenException("token 无效，请重新获取");
         }
     }
 }

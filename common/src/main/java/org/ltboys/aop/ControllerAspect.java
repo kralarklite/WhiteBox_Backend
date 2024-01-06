@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class ControllerAspect {
 
-    @Pointcut("execution(public * org.ltboys.controller.*.*(..)) && @annotation(org.ltboys.annotation.OauthLogin)")
+    @Pointcut("execution(public * org.ltboys.controller*.*(..)) && @annotation(org.ltboys.annotation.OauthLogin)")
     public void OauthLoginCut() {}
 
     @Around("OauthLoginCut()")
