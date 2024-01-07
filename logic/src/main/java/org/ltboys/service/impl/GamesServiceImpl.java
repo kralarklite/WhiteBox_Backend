@@ -51,7 +51,7 @@ public class GamesServiceImpl implements GamesService {
                 .eq("id",ro.getId())
                 .eq("flag",1);
         gamesEntityQueryWrapper
-                .select("id","name","cover","`desc`","publisher","score","release_time");
+                .select("id","name","cover","head","`desc`","publisher","score","release_time");
         List<Map<String , Object>> viewGameList = gamesMapper.selectMaps(gamesEntityQueryWrapper);
         //List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
 
@@ -177,7 +177,12 @@ public class GamesServiceImpl implements GamesService {
             gamesEntityQueryWrapper.last(limit_sql);
         }
 
-        gamesEntityQueryWrapper.orderByDesc("id");
+        //随机排序还是按照id排序
+        if (ro.isNeedRand()) {
+            gamesEntityQueryWrapper.orderBy(true, true, "RAND()");
+        } else {
+            gamesEntityQueryWrapper.orderByAsc("id");
+        }
 
         List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
 

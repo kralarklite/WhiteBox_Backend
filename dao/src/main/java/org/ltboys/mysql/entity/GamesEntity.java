@@ -22,6 +22,8 @@ public class GamesEntity {
 
     private String cover;
 
+    private String head;
+
     @TableField("`desc`")
     private String desc;
 

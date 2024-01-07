@@ -25,4 +25,6 @@ public class QueryGamesRo {
 
     private boolean needHotGame;
 
+    private boolean needRand;
+
 }

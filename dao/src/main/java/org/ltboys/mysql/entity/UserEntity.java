@@ -39,4 +39,6 @@ public class UserEntity {
     private Integer flag;
 
     private Date banUntil;
+
+    private Integer recommended;
 }

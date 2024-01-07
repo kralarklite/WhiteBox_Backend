@@ -102,10 +102,22 @@ public class UserServiceImpl implements UserService {
 
         //查询账号状态
         if (userEntity.getFlag()!=1){
-            retJson.put("retCode","9904");
-            retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
-            retJson.put("limit",userEntity.getBanUntil());
-            return retJson;
+            //判断是否解封
+            if (userEntity.getBanUntil().before(new Date())) {
+                UserEntity updatePara = new UserEntity();
+                updatePara.setFlag(1);
+                int fact = userMapper.update(updatePara,userEntityQueryWrapper);
+                if(fact != 1){
+                    retJson.put("retCode","9905");
+                    retJson.put("retMsg","登录失败");
+                    return retJson;
+                }
+            } else {
+                retJson.put("retCode","9904");
+                retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
+                retJson.put("limit",userEntity.getBanUntil());
+                return retJson;
+            }
         }
 
         //更新登录时间
@@ -129,6 +141,7 @@ public class UserServiceImpl implements UserService {
         retJson.put("retMsg","登录成功");
         retJson.put("userId",userEntity.getId());
         retJson.put("token",token);
+        retJson.put("recommended",userEntity.getRecommended());
         return retJson;
     }
 
