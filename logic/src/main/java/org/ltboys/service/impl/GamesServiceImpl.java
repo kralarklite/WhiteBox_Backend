@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
 import org.ltboys.mysql.entity.GameStatisticEntity;
+import org.ltboys.mysql.entity.CollectMapEntity;
 import org.ltboys.mysql.entity.GamesEntity;
 import org.ltboys.mysql.entity.TagEntity;
 import org.ltboys.mysql.entity.TagMapEntity;
 import org.ltboys.mysql.mapper.GameStatisticMapper;
+import org.ltboys.mysql.mapper.CollectMapMapper;
 import org.ltboys.mysql.mapper.GamesMapper;
 import org.ltboys.mysql.mapper.TagMapMapper;
 import org.ltboys.mysql.mapper.TagMapper;
@@ -41,6 +43,9 @@ public class GamesServiceImpl implements GamesService {
 
     @Autowired
     private GameStatisticMapper gameStatisticMapper;
+
+    @Autowired
+    private CollectMapMapper collectMapMapper;
 
     @Override
     public JSONObject viewGame(IdRo ro) throws Exception{
@@ -226,6 +231,38 @@ public class GamesServiceImpl implements GamesService {
         List<TagEntity> tagEntityList = tagMapper.selectList(tagEntityQueryWrapper);
         retJson.put("TagList",tagEntityList);
         return retJson;
+    }
+
+    public JSONObject recommendGames(IdRo ro) throws Exception{
+        JSONObject retJson = new JSONObject();
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+
+        // Assuming `ro` contains the user_id you want to query
+        collectMapEntityQueryWrapper
+                .eq("user_id", ro.getId())
+                .eq("flag",1);
+
+        try {
+            // Assuming collectMapEntityMapper is your MyBatis or other ORM mapper for CollectMapEntity
+            List<CollectMapEntity> userCollectedGamesList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+
+            ArrayList<Integer> gameIdsList = new ArrayList<>();;
+            for (CollectMapEntity collectMapEntity : userCollectedGamesList) {
+                gameIdsList.add(collectMapEntity.getGameId());
+            }
+            retJson.put("user_collected_games", gameIdsList);
+
+
+        } catch (Exception e) {
+            // Handle the exception appropriately (logging, rethrowing, etc.)
+            throw new Exception("Error while querying user_collected_games: " + e.getMessage());
+        }
+
+        return retJson;
+
+
+
+
     }
 
 
