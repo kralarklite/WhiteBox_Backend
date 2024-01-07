@@ -72,4 +72,6 @@ public class GamesController {
             return ActionResult.failure("查询游戏失败");
         }
     }
+
+
 }
