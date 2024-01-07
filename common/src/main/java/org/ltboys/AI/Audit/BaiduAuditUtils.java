@@ -101,7 +101,7 @@ public class BaiduAuditUtils {
                 list.add(true);
             } else {
                 list.add(false);
-                list.add(jsonObject.getJSONArray("data").get(1));
+                list.add(jsonObject.getJSONArray("data").get(0));
                 //                List<Object> list = JSONObject.parseArray(jsonObject.getString("data"));
 //                JSONObject newJsonObject = (JSONObject) JSONObject.parseArray(jsonObject.getString("data")).get(0);
 //                System.out.println("这是else打印的list");
