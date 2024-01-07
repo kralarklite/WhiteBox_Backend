@@ -2,14 +2,16 @@ package org.ltboys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.jdbc.Null;
 import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
+import org.ltboys.mysql.entity.GameStatisticEntity;
 import org.ltboys.mysql.entity.CollectMapEntity;
 import org.ltboys.mysql.entity.GamesEntity;
 import org.ltboys.mysql.entity.TagEntity;
 import org.ltboys.mysql.entity.TagMapEntity;
+import org.ltboys.mysql.mapper.GameStatisticMapper;
 import org.ltboys.mysql.mapper.CollectMapMapper;
 import org.ltboys.mysql.mapper.GamesMapper;
 import org.ltboys.mysql.mapper.TagMapMapper;
@@ -17,9 +19,9 @@ import org.ltboys.mysql.mapper.TagMapper;
 import org.ltboys.service.GamesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,9 @@ public class GamesServiceImpl implements GamesService {
     private TagMapMapper tagMapMapper;
 
     @Autowired
+    private GameStatisticMapper gameStatisticMapper;
+
+    @Autowired
     private CollectMapMapper collectMapMapper;
 
     @Override
@@ -51,7 +56,7 @@ public class GamesServiceImpl implements GamesService {
                 .eq("id",ro.getId())
                 .eq("flag",1);
         gamesEntityQueryWrapper
-                .select("id","name","cover","`desc`","publisher","score","release_time");
+                .select("id","name","cover","head","`desc`","publisher","score","release_time");
         List<Map<String , Object>> viewGameList = gamesMapper.selectMaps(gamesEntityQueryWrapper);
         //List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
 
@@ -60,6 +65,8 @@ public class GamesServiceImpl implements GamesService {
             retJson.put("retMsg","game数据异常");
             return retJson;
         }
+
+        gameStatistic(ro.getId());
 
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
         tagMapEntityQueryWrapper
@@ -89,6 +96,42 @@ public class GamesServiceImpl implements GamesService {
         QueryWrapper<TagMapEntity> tagMapEntityQueryWrapper = new QueryWrapper<>();
 
         gamesEntityQueryWrapper.eq("flag",1);
+
+        //查询近期热门游戏
+        if (ro.isNeedHotGame()){
+            QueryWrapper<GameStatisticEntity> gameStatisticEntityQueryWrapper = new QueryWrapper<>();
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -7);
+            gameStatisticEntityQueryWrapper
+                    //.ge("stat_time",calendar)
+                    .apply("DATE(stat_time) >= {0}", LocalDate.now().minusWeeks(1))
+                    .eq("flag", 1)
+                    .select("SUM(total) as total","game_id")
+                    .groupBy("game_id")
+                    .orderByDesc("total")
+                    .last("LIMIT 20");
+            List<Map<String,Object>> gameStatisticEntityList = gameStatisticMapper.selectMaps(gameStatisticEntityQueryWrapper);
+            if (gameStatisticEntityList.size()!=0) {
+                List<Integer> gameIdList = gameStatisticEntityList.stream().map(map -> (Integer)map.get("game_id")).collect(Collectors.toList());
+                //List<GamesEntity> gamesEntityList = gamesMapper.selectBatchIds(gameIdList);
+                gamesEntityQueryWrapper
+                        .in("id", gameIdList)
+                        .orderBy(true, true, "RAND()")
+                        .last("LIMIT " + ro.getLimit());
+                List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+                retJson.put("GameList",gamesEntityList);
+                if (ro.isNeedTag()){
+                    List<List<TagEntity>> gameTagList = new ArrayList<>();
+                    for (GamesEntity gamesEntity : gamesEntityList){
+                        gameTagList.add(viewTag(gamesEntity.getId()));
+                    }
+                    retJson.put("tagList",gameTagList);
+                }
+                return retJson;
+            }
+
+        }
+
 
         //根据游戏名查询
         if (!Objects.equals(ro.getName(), "")){
@@ -128,6 +171,8 @@ public class GamesServiceImpl implements GamesService {
             }
         }
 */
+
+
         //分页查询
         int limit = ro.getLimit();
         if (limit!=0){
@@ -137,7 +182,12 @@ public class GamesServiceImpl implements GamesService {
             gamesEntityQueryWrapper.last(limit_sql);
         }
 
-        gamesEntityQueryWrapper.orderByDesc("id");
+        //随机排序还是按照id排序
+        if (ro.isNeedRand()) {
+            gamesEntityQueryWrapper.orderBy(true, true, "RAND()");
+        } else {
+            gamesEntityQueryWrapper.orderByAsc("id");
+        }
 
         List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
 
@@ -213,5 +263,31 @@ public class GamesServiceImpl implements GamesService {
 
 
 
+    }
+
+
+    //每次调用此方法时使游戏近期访问量+1
+    public void gameStatistic(int gameId) {
+        QueryWrapper<GameStatisticEntity> gameStatisticEntityQueryWrapper = new QueryWrapper<>();
+        gameStatisticEntityQueryWrapper
+                .eq("game_id", gameId)
+                .apply("DATE(stat_time) = {0}", LocalDate.now());
+
+        int fact;
+        if (gameStatisticMapper.exists(gameStatisticEntityQueryWrapper)) {
+            GameStatisticEntity gameStatisticEntity = gameStatisticMapper.selectOne(gameStatisticEntityQueryWrapper);
+            GameStatisticEntity updatePara = new GameStatisticEntity();
+            updatePara.setTotal(gameStatisticEntity.getTotal()+1);
+            fact = gameStatisticMapper.update(updatePara,gameStatisticEntityQueryWrapper);
+        } else {
+            GameStatisticEntity gameStatisticEntity = new GameStatisticEntity();
+            gameStatisticEntity.setGameId(gameId);
+            gameStatisticEntity.setStatTime(new Date());
+            gameStatisticEntity.setTotal(1);
+            gameStatisticEntity.setFlag(1);
+            fact = gameStatisticMapper.insert(gameStatisticEntity);
+        }
+
+        if (fact != 1) System.out.println("游戏数据统计异常");
     }
 }

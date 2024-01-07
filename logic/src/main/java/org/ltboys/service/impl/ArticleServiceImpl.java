@@ -200,6 +200,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         retJson.put("retCode","0000");
         retJson.put("retMsg","文章发布成功");
+        retJson.put("articleId", articleEntity.getArticleId());
         return retJson;
     }
 

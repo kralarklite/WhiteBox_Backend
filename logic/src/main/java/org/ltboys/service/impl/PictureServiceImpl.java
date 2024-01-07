@@ -60,7 +60,7 @@ public class PictureServiceImpl  implements PictureService {
             JSONObject retJson = new JSONObject();
 
             InputStream inputStream = ro.getInputStream();
-            FileOutputStream file = new FileOutputStream("d://pict/saved.jpg");
+            FileOutputStream file = new FileOutputStream("../../../../../../../../saved.jpg");
             int j;
             while ((j = inputStream.read()) != -1){
                 file.write(j);
@@ -76,7 +76,7 @@ public class PictureServiceImpl  implements PictureService {
 
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("smfile", new org.springframework.core.io.FileSystemResource("d://pict/saved.jpg"));
+            body.add("smfile", new org.springframework.core.io.FileSystemResource("../../../../../../../../saved.jpg"));
 
             HttpEntity requestEntity = new HttpEntity<>(body, headers);
 
@@ -94,7 +94,7 @@ public class PictureServiceImpl  implements PictureService {
                 retJson.put("error", "Failed to upload the image");
             }
             //删除本地文件
-            File img_file = new File("d://pict/saved.jpg");
+            File img_file = new File("../../../../../../../../saved.jpg");
             if (img_file.isFile() && img_file.exists()){
                 img_file.delete();
             }
