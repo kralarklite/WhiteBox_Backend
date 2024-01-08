@@ -196,6 +196,13 @@ public class UserController {
         }
     }
 
+    /**
+     * 用户评分游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/rategame")
     public ActionResult rateGame(@RequestHeader("token") @Validated String token, @RequestBody @Validated RateGameRo ro) throws Exception {
         try {
@@ -207,6 +214,12 @@ public class UserController {
         }
     }
 
+    /**
+     * 用户查看对某游戏的评分和收藏状态
+     * @param ro
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/viewgame_user")
     public ActionResult viewGameUser(@RequestBody @Validated UserCollectRo ro) throws Exception {
         try {
