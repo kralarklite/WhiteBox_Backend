@@ -230,4 +230,22 @@ public class UserController {
             return ActionResult.failure("登录失败");
         }
     }
+
+    /**
+     * 接收用户首次推荐得到的游戏id并收藏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/choosegame")
+    public ActionResult chooseGame(@RequestHeader("token") @Validated String token, @RequestBody @Validated ChooseGameRo ro) throws Exception {
+        try {
+            JSONObject vo = userService.chooseGame(token, ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("登录失败");
+        }
+    }
 }

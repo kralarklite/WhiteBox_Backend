@@ -109,4 +109,13 @@ public interface UserService {
      * @throws Exception
      */
     JSONObject viewGameUser(UserCollectRo ro) throws Exception;
+
+    /**
+     * 接收用户首次推荐得到的游戏id并收藏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject chooseGame(String token, ChooseGameRo ro) throws Exception;
 }

@@ -529,4 +529,28 @@ public class UserServiceImpl implements UserService {
 
         return retJson;
     }
+
+    @Override
+    public JSONObject chooseGame(String token, ChooseGameRo ro) throws Exception {
+
+        JSONObject retJson = new JSONObject();
+
+        for (Integer id: ro.getChooseList()) {
+            UserCollectRo userCollectRo = new UserCollectRo();
+            userCollectRo.setUserId(ro.getUserId());
+            userCollectRo.setGameId(id);
+            try {
+                addCollect(token,userCollectRo);
+            } catch (Exception ignored) {
+            }
+        }
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id", ro.getUserId());
+        UserEntity updatePara = new UserEntity();
+        updatePara.setRecommended(1);
+        userMapper.update(updatePara, userEntityQueryWrapper);
+        retJson.put("retCode", "0000");
+        retJson.put("retMsg", "成功");
+        return retJson;
+    }
 }
