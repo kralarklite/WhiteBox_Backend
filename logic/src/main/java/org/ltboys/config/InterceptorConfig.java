@@ -28,6 +28,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/user/updateuser",
                         "/user/myarticles",
                         "/user/mycomments",
+                        "/user/mycollects",
                         "/user/addcollect",
                         "/user/deletecollect",
                         "/information/addarticle",

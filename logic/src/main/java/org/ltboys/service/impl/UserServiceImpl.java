@@ -337,7 +337,7 @@ public class UserServiceImpl implements UserService {
             CollectMapEntity collectMapEntity = collectMapEntityList.get(0);
             if (collectMapEntity.getFlag()==1) {
                 retJson.put("retCode", "9912");
-                retJson.put("retMsg", "删除失败，用户已收藏此游戏");
+                retJson.put("retMsg", "收藏失败，用户已收藏此游戏");
             } else {
                 CollectMapEntity updatePara = new CollectMapEntity();
                 updatePara.setFlag(1);
@@ -348,7 +348,7 @@ public class UserServiceImpl implements UserService {
                     retJson.put("retMsg", "收藏失败，数据修改异常");
                 } else {
                     retJson.put("retCode", "0000");
-                    retJson.put("retMsg", "删除收藏成功");
+                    retJson.put("retMsg", "收藏成功");
                 }
             }
             return retJson;
@@ -357,7 +357,7 @@ public class UserServiceImpl implements UserService {
             collectMapEntity.setUserId(ro.getUserId());
             collectMapEntity.setGameId(ro.getGameId());
             collectMapEntity.setFlag(1);
-            int fact = collectMapMapper.update(collectMapEntity, collectMapEntityQueryWrapper);
+            int fact = collectMapMapper.insert(collectMapEntity);
             if (fact != 1) {
                 retJson.put("retCode", "9910");
                 retJson.put("retMsg", "收藏失败，数据修改异常");
@@ -381,7 +381,7 @@ public class UserServiceImpl implements UserService {
                 .eq("user_id", ro.getUserId())
                 .eq("game_id", ro.getGameId())
                 .eq("flag", 1);
-        if (collectMapMapper.exists(collectMapEntityQueryWrapper)) {
+        if (!collectMapMapper.exists(collectMapEntityQueryWrapper)) {
             retJson.put("retCode", "9911");
             retJson.put("retMsg", "删除失败，无此用户收藏此游戏的信息");
             return retJson;
@@ -431,8 +431,15 @@ public class UserServiceImpl implements UserService {
                 .eq("flag",1);
         List<CollectMapEntity> collectMapEntityList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
         List<Integer> gameIdList = collectMapEntityList.stream().map(CollectMapEntity::getGameId).collect(Collectors.toList());
+        if (gameIdList.size()==0) {
+            retJson.put("retCode","9908");
+            retJson.put("retMsg","该用户无收藏");
+            return retJson;
+        }
         List<GamesEntity> gamesEntityList = gamesMapper.selectBatchIds(gameIdList);
         retJson.put("gamesEntityList",gamesEntityList);
+        retJson.put("retCode", "0000");
+        retJson.put("retMsg", "查询成功");
         return retJson;
     }
 }
