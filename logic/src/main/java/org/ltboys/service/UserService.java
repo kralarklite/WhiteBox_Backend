@@ -92,4 +92,8 @@ public interface UserService {
      * @throws Exception
      */
     JSONObject myCollects(String token) throws Exception;
+
+    JSONObject rateGame(String token, RateGameRo ro) throws Exception;
+
+    JSONObject viewGameUser(UserCollectRo ro) throws Exception;
 }

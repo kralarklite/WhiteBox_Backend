@@ -41,8 +41,10 @@ public class UserServiceImpl implements UserService {
     private CollectMapMapper collectMapMapper;
 
     @Autowired
-    private GamesMapper gamesMapper;
+    private RateGameMapper rateGameMapper;
 
+    @Autowired
+    private GamesMapper gamesMapper;
 
     @Override
     public JSONObject register(RegisterRo ro) throws Exception {
@@ -440,6 +442,91 @@ public class UserServiceImpl implements UserService {
         retJson.put("gamesEntityList",gamesEntityList);
         retJson.put("retCode", "0000");
         retJson.put("retMsg", "查询成功");
+        return retJson;
+    }
+
+    @Override
+    public JSONObject rateGame(String token, RateGameRo ro) throws Exception {
+
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
+
+        JSONObject retJson = new JSONObject();
+
+        if (ro.getRate()<1 || ro.getRate()>5) {
+            retJson.put("retCode", "9921");
+            retJson.put("retMsg", "分数异常");
+            return retJson;
+        }
+
+        QueryWrapper<RateGameEntity> rateGameEntityQueryWrapper = new QueryWrapper<>();
+        rateGameEntityQueryWrapper
+                .eq("user_id", ro.getUserId())
+                .eq("game_id", ro.getGameId());
+
+        List<RateGameEntity> rateGameEntityList = rateGameMapper.selectList(rateGameEntityQueryWrapper);
+        if (rateGameEntityList.size() == 0) {
+            RateGameEntity rateGameEntity = new RateGameEntity();
+            rateGameEntity.setRate(ro.getRate());
+            rateGameEntity.setUserId(ro.getUserId());
+            rateGameEntity.setGameId(ro.getGameId());
+            int fact = rateGameMapper.insert(rateGameEntity);
+            if (fact != 1) {
+                retJson.put("retCode", "9920");
+                retJson.put("retMsg", "评分失败，数据修改异常");
+            } else {
+                retJson.put("retCode", "0000");
+                retJson.put("retMsg", "评分成功");
+            }
+            return retJson;
+        } else {
+            RateGameEntity updatePara = new RateGameEntity();
+            updatePara.setRate(ro.getRate());
+            updatePara.setUpdatedAt(new Date());
+            int fact = rateGameMapper.update(updatePara, rateGameEntityQueryWrapper);
+            if (fact != 1) {
+                retJson.put("retCode", "9920");
+                retJson.put("retMsg", "评分失败，数据修改异常");
+            } else {
+                retJson.put("retCode", "0000");
+                retJson.put("retMsg", "修改评分成功");
+            }
+            return retJson;
+        }
+    }
+
+    @Override
+    public JSONObject viewGameUser(UserCollectRo ro) throws Exception {
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<RateGameEntity> rateGameEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+
+        rateGameEntityQueryWrapper
+                .eq("user_id", ro.getUserId())
+                .eq("game_id", ro.getGameId());
+
+        collectMapEntityQueryWrapper
+                .eq("user_id", ro.getUserId())
+                .eq("game_id", ro.getGameId());
+
+        List<RateGameEntity> rateGameEntityList = rateGameMapper.selectList(rateGameEntityQueryWrapper);
+        List<CollectMapEntity> collectMapEntityList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+
+        if (rateGameEntityList.size()!=0) {
+            retJson.put("rateFlag", 1);
+            retJson.put("rate", rateGameEntityList.get(0).getRate());
+        } else {
+            retJson.put("rateFlag", 0);
+            retJson.put("rate", 0);
+        }
+
+        if (collectMapEntityList.size()!=0 && collectMapEntityList.get(0).getFlag()==1) {
+            retJson.put("collectFlag", 1);
+        } else {
+            retJson.put("collectFlag", 0);
+        }
+
         return retJson;
     }
 }

@@ -30,6 +30,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/user/mycomments",
                         "/user/mycollects",
                         "/user/addcollect",
+                        "/user/rategame",
+                        "/user/viewgame_user",
                         "/user/deletecollect",
                         "/information/addarticle",
                         "/information/addcomment",

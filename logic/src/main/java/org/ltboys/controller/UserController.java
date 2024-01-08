@@ -195,4 +195,26 @@ public class UserController {
             return ActionResult.failure("登录失败");
         }
     }
+
+    @PostMapping("/rategame")
+    public ActionResult rateGame(@RequestHeader("token") @Validated String token, @RequestBody @Validated RateGameRo ro) throws Exception {
+        try {
+            JSONObject vo = userService.rateGame(token, ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("登录失败");
+        }
+    }
+
+    @PostMapping("/viewgame_user")
+    public ActionResult viewGameUser(@RequestBody @Validated UserCollectRo ro) throws Exception {
+        try {
+            JSONObject vo = userService.viewGameUser(ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("登录失败");
+        }
+    }
 }
