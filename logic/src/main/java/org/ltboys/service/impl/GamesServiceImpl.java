@@ -245,21 +245,21 @@ public class GamesServiceImpl implements GamesService {
     @Override
     public JSONObject recommendGames(IdRo ro) throws Exception{
         JSONObject retJson = new JSONObject();
-        QueryWrapper<RateGameEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<RateGameEntity> rateGameEntityQueryWrapper = new QueryWrapper<>();
         QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
 
         // Assuming `ro` contains the user_id you want to query
-        collectMapEntityQueryWrapper
+        rateGameEntityQueryWrapper
                 .eq("user_id", ro.getId());
 
 
         try {
             // Assuming collectMapEntityMapper is your MyBatis or other ORM mapper for CollectMapEntity
-            List<RateGameEntity> userCollectedGamesList = rateGameMapper.selectList(collectMapEntityQueryWrapper);
+            List<RateGameEntity> userRatedGamesList = rateGameMapper.selectList(rateGameEntityQueryWrapper);
 
             Map<Integer,Double> userRateMap = new HashMap<>();
 
-            for (RateGameEntity rateGameEntity : userCollectedGamesList) {
+            for (RateGameEntity rateGameEntity : userRatedGamesList) {
                 userRateMap.put(rateGameEntity.getGameId(), rateGameEntity.getRate());
             }
 
@@ -270,26 +270,26 @@ public class GamesServiceImpl implements GamesService {
             Double max_similarity = 0.0;
             Integer recom_userid = 0;
             Map<Integer,Double> max_sim = new HashMap<>();
-            max_sim.put(recom_userid, max_similarity);
             for (Integer userid : userIdList){
                 if (userid.equals(ro.getId())){
                     continue;
                 }
 
-                QueryWrapper<RateGameEntity> othercollectMapEntityQueryWrapper = new QueryWrapper<>();
-                othercollectMapEntityQueryWrapper
+                QueryWrapper<RateGameEntity> otherrateMapEntityQueryWrapper = new QueryWrapper<>();
+                otherrateMapEntityQueryWrapper
                         .eq("user_id", userid);
-                List<RateGameEntity> otheruserCollectedGamesList = rateGameMapper.selectList(othercollectMapEntityQueryWrapper);
+                List<RateGameEntity> otheruserratedGamesList = rateGameMapper.selectList(otherrateMapEntityQueryWrapper);
                 Map<Integer,Double> otheruserRateMap = new HashMap<>();
-                for (RateGameEntity othercollectMapEntity : otheruserCollectedGamesList) {
-                    otheruserRateMap.put(othercollectMapEntity.getGameId(),othercollectMapEntity.getRate());
+                for (RateGameEntity otherrateMapEntity : otheruserratedGamesList) {
+                    otheruserRateMap.put(otherrateMapEntity.getGameId(),otherrateMapEntity.getRate());
                 }
                 double similarity = calculatePearsonSimilarity(userRateMap,otheruserRateMap);
-                if (similarity > max_similarity){
+                if (similarity > max_similarity) {
                     max_similarity = similarity;
-                    max_sim.put(userid, similarity);
+                    recom_userid = userid;
                 }
             }
+            max_sim.put(recom_userid,max_similarity);
             // After finding the user with maximum similarity
             Integer maxSimilarityUserId = max_sim.keySet().iterator().next();
             Map<Integer, Double> maxSimilarityUserRateMap = new HashMap<>();
@@ -312,9 +312,10 @@ public class GamesServiceImpl implements GamesService {
             gameIdsNotInUser.removeAll(gameIdsInUser);
 
 // Output the recommended gameId
+
             if (!gameIdsNotInUser.isEmpty()) {
-                Integer recommendedGameId = gameIdsNotInUser.iterator().next();
-                retJson.put("recommendedGameId", recommendedGameId);
+                List<GamesEntity> gamelst = gamesMapper.selectBatchIds(gameIdsNotInUser);
+                retJson.put("recommendedGames", gamelst);
             } else {
                 retJson.put("recommendedGameId", null);
             }
