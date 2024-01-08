@@ -2,7 +2,6 @@ package org.ltboys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.dto.ro.IdRo;
 import org.ltboys.dto.ro.QueryGamesRo;
@@ -12,6 +11,8 @@ import org.ltboys.mysql.entity.GamesEntity;
 import org.ltboys.mysql.entity.TagEntity;
 import org.ltboys.mysql.entity.TagMapEntity;
 import org.ltboys.mysql.mapper.*;
+import org.ltboys.mysql.entity.*;
+import org.ltboys.mysql.mapper.*;
 import org.ltboys.service.GamesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author kralarklite
@@ -42,6 +47,12 @@ public class GamesServiceImpl implements GamesService {
 
     @Autowired
     private CollectMapMapper collectMapMapper;
+
+    @Autowired
+    private RateGameMapper rateGameMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public JSONObject viewGame(IdRo ro) throws Exception{
@@ -234,23 +245,79 @@ public class GamesServiceImpl implements GamesService {
     @Override
     public JSONObject recommendGames(IdRo ro) throws Exception{
         JSONObject retJson = new JSONObject();
-        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<RateGameEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
 
         // Assuming `ro` contains the user_id you want to query
         collectMapEntityQueryWrapper
-                .eq("user_id", ro.getId())
-                .eq("flag",1);
+                .eq("user_id", ro.getId());
+
 
         try {
             // Assuming collectMapEntityMapper is your MyBatis or other ORM mapper for CollectMapEntity
-            List<CollectMapEntity> userCollectedGamesList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+            List<RateGameEntity> userCollectedGamesList = rateGameMapper.selectList(collectMapEntityQueryWrapper);
 
-            ArrayList<Integer> gameIdsList = new ArrayList<>();;
-            for (CollectMapEntity collectMapEntity : userCollectedGamesList) {
-                gameIdsList.add(collectMapEntity.getGameId());
+            Map<Integer,Double> userRateMap = new HashMap<>();
+
+            for (RateGameEntity rateGameEntity : userCollectedGamesList) {
+                userRateMap.put(rateGameEntity.getGameId(), rateGameEntity.getRate());
             }
-            retJson.put("user_collected_games", gameIdsList);
 
+            List<Integer> userIdList = userMapper.selectList(userEntityQueryWrapper.select("id"))
+                    .stream()
+                    .map(UserEntity::getId)
+                    .collect(Collectors.toList());
+            Double max_similarity = 0.0;
+            Integer recom_userid = 0;
+            Map<Integer,Double> max_sim = new HashMap<>();
+            max_sim.put(recom_userid, max_similarity);
+            for (Integer userid : userIdList){
+                if (userid.equals(ro.getId())){
+                    continue;
+                }
+
+                QueryWrapper<RateGameEntity> othercollectMapEntityQueryWrapper = new QueryWrapper<>();
+                othercollectMapEntityQueryWrapper
+                        .eq("user_id", userid);
+                List<RateGameEntity> otheruserCollectedGamesList = rateGameMapper.selectList(othercollectMapEntityQueryWrapper);
+                Map<Integer,Double> otheruserRateMap = new HashMap<>();
+                for (RateGameEntity othercollectMapEntity : otheruserCollectedGamesList) {
+                    otheruserRateMap.put(othercollectMapEntity.getGameId(),othercollectMapEntity.getRate());
+                }
+                double similarity = calculatePearsonSimilarity(userRateMap,otheruserRateMap);
+                if (similarity > max_similarity){
+                    max_similarity = similarity;
+                    max_sim.put(userid, similarity);
+                }
+            }
+            // After finding the user with maximum similarity
+            Integer maxSimilarityUserId = max_sim.keySet().iterator().next();
+            Map<Integer, Double> maxSimilarityUserRateMap = new HashMap<>();
+
+            QueryWrapper<RateGameEntity> maxSimilarityUserCollectMapQueryWrapper = new QueryWrapper<>();
+            maxSimilarityUserCollectMapQueryWrapper.eq("user_id", maxSimilarityUserId);
+
+            List<RateGameEntity> maxSimilarityUserCollectedGamesList = rateGameMapper.selectList(maxSimilarityUserCollectMapQueryWrapper);
+
+            for (RateGameEntity maxSimilarityUserRateGameEntity : maxSimilarityUserCollectedGamesList) {
+                maxSimilarityUserRateMap.put(maxSimilarityUserRateGameEntity.getGameId(), maxSimilarityUserRateGameEntity.getRate());
+            }
+
+// Find the recommended gameId based on the difference between maxSimilarityUserRateMap and userRateMap
+            Set<Integer> gameIdsInMaxSimilarityUser = maxSimilarityUserRateMap.keySet();
+            Set<Integer> gameIdsInUser = userRateMap.keySet();
+
+// Find gameIds in maxSimilarityUserRateMap but not in userRateMap
+            Set<Integer> gameIdsNotInUser = new HashSet<>(gameIdsInMaxSimilarityUser);
+            gameIdsNotInUser.removeAll(gameIdsInUser);
+
+// Output the recommended gameId
+            if (!gameIdsNotInUser.isEmpty()) {
+                Integer recommendedGameId = gameIdsNotInUser.iterator().next();
+                retJson.put("recommendedGameId", recommendedGameId);
+            } else {
+                retJson.put("recommendedGameId", null);
+            }
 
         } catch (Exception e) {
             // Handle the exception appropriately (logging, rethrowing, etc.)
@@ -259,9 +326,50 @@ public class GamesServiceImpl implements GamesService {
 
         return retJson;
 
+    }
 
+    private double calculatePearsonSimilarity(Map<Integer,Double> user1, Map<Integer,Double> user2) {
+        List<Integer> commonItems = new ArrayList<>();
 
+        for (Entry<Integer, Double> entry : user1.entrySet()) {
+            Integer itemId = entry.getKey();
+            if (user2.containsKey(itemId)) {
+                commonItems.add(itemId);
+            }
+        }
 
+        if (commonItems.isEmpty()) {
+            // No common items, similarity is undefined
+            return 0.0;
+        }
+
+        double sumX = 0.0;
+        double sumY = 0.0;
+        double sumX_Sq = 0.0;
+        double sumY_Sq = 0.0;
+        double sumXY = 0.0;
+        int N = commonItems.size();
+
+        for (Integer itemId : commonItems) {
+            double ratingUser1 = user1.get(itemId);
+            double ratingUser2 = user2.get(itemId);
+
+            sumX += ratingUser1;
+            sumY += ratingUser2;
+            sumX_Sq += Math.pow(ratingUser1, 2);
+            sumY_Sq += Math.pow(ratingUser2, 2);
+            sumXY += ratingUser1 * ratingUser2;
+        }
+
+        double numerator = sumXY - (sumX * sumY / N);
+        double denominator = Math.sqrt((sumX_Sq - Math.pow(sumX, 2) / N) * (sumY_Sq - Math.pow(sumY, 2) / N));
+
+        // Avoid division by zero
+        if (denominator == 0) {
+            return 0.0;
+        }
+
+        return numerator / denominator;
     }
 
 
