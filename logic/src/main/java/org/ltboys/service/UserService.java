@@ -1,10 +1,7 @@
 package org.ltboys.service;
 
 import com.alibaba.fastjson.JSONObject;
-import org.ltboys.dto.ro.IdRo;
-import org.ltboys.dto.ro.LoginRo;
-import org.ltboys.dto.ro.RegisterRo;
-import org.ltboys.dto.ro.UpdateUserRo;
+import org.ltboys.dto.ro.*;
 import org.springframework.stereotype.Service;
 
 /**
@@ -69,4 +66,30 @@ public interface UserService {
      * @throws Exception
      */
     JSONObject updateUser(String token, UpdateUserRo ro) throws Exception;
+
+    /**
+     * 用户添加收藏游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject addCollect(String token, UserCollectRo ro) throws Exception;
+
+    /**
+     * 用户删除收藏游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject deleteCollect(String token, UserCollectRo ro) throws Exception;
+
+    /**
+     * 查询个人收藏
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    JSONObject myCollects(String token) throws Exception;
 }

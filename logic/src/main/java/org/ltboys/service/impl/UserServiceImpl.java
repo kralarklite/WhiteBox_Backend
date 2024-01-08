@@ -5,17 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.aop.exception.TokenException;
 import org.ltboys.context.utils.JwtUtil;
-import org.ltboys.dto.ro.IdRo;
-import org.ltboys.dto.ro.LoginRo;
-import org.ltboys.dto.ro.RegisterRo;
-import org.ltboys.dto.ro.UpdateUserRo;
+import org.ltboys.dto.ro.*;
 import org.ltboys.dto.vo.UserBriefVo;
-import org.ltboys.mysql.entity.ArticleEntity;
-import org.ltboys.mysql.entity.CommentEntity;
-import org.ltboys.mysql.entity.UserEntity;
-import org.ltboys.mysql.mapper.ArticleMapper;
-import org.ltboys.mysql.mapper.CommentMapper;
-import org.ltboys.mysql.mapper.UserMapper;
+import org.ltboys.mysql.entity.*;
+import org.ltboys.mysql.mapper.*;
 import org.ltboys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.ltboys.context.utils.JwtUtil.checkUserId;
 import static org.ltboys.context.utils.JwtUtil.getUserId;
@@ -42,6 +36,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private CommentMapper commentMapper;
+
+    @Autowired
+    private CollectMapMapper collectMapMapper;
+
+    @Autowired
+    private GamesMapper gamesMapper;
 
 
     @Override
@@ -317,6 +317,122 @@ public class UserServiceImpl implements UserService {
 
         retJson.put("retCode","0000");
         retJson.put("retMsg","修改用户信息成功");
+        return retJson;
+    }
+
+    @Override
+    public JSONObject addCollect(String token, UserCollectRo ro) throws Exception {
+
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        collectMapEntityQueryWrapper
+                .eq("user_id", ro.getUserId())
+                .eq("game_id", ro.getGameId());
+
+        List<CollectMapEntity> collectMapEntityList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+        if (collectMapEntityList.size()!=0) {
+            CollectMapEntity collectMapEntity = collectMapEntityList.get(0);
+            if (collectMapEntity.getFlag()==1) {
+                retJson.put("retCode", "9912");
+                retJson.put("retMsg", "删除失败，用户已收藏此游戏");
+            } else {
+                CollectMapEntity updatePara = new CollectMapEntity();
+                updatePara.setFlag(1);
+                updatePara.setUpdatedAt(new Date());
+                int fact = collectMapMapper.update(updatePara, collectMapEntityQueryWrapper);
+                if (fact != 1) {
+                    retJson.put("retCode", "9910");
+                    retJson.put("retMsg", "收藏失败，数据修改异常");
+                } else {
+                    retJson.put("retCode", "0000");
+                    retJson.put("retMsg", "删除收藏成功");
+                }
+            }
+            return retJson;
+        } else {
+            CollectMapEntity collectMapEntity = new CollectMapEntity();
+            collectMapEntity.setUserId(ro.getUserId());
+            collectMapEntity.setGameId(ro.getGameId());
+            collectMapEntity.setFlag(1);
+            int fact = collectMapMapper.update(collectMapEntity, collectMapEntityQueryWrapper);
+            if (fact != 1) {
+                retJson.put("retCode", "9910");
+                retJson.put("retMsg", "收藏失败，数据修改异常");
+            } else {
+                retJson.put("retCode", "0000");
+                retJson.put("retMsg", "收藏成功");
+            }
+            return retJson;
+        }
+    }
+
+    @Override
+    public JSONObject deleteCollect(String token, UserCollectRo ro) throws Exception {
+
+        if (!checkUserId(token, String.valueOf(ro.getUserId()))) throw new TokenException("code3:非法操作！请重新登录！");
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        collectMapEntityQueryWrapper
+                .eq("user_id", ro.getUserId())
+                .eq("game_id", ro.getGameId())
+                .eq("flag", 1);
+        if (collectMapMapper.exists(collectMapEntityQueryWrapper)) {
+            retJson.put("retCode", "9911");
+            retJson.put("retMsg", "删除失败，无此用户收藏此游戏的信息");
+            return retJson;
+        }
+
+        CollectMapEntity updatePara = new CollectMapEntity();
+        updatePara.setFlag(0);
+        updatePara.setUpdatedAt(new Date());
+        int fact = collectMapMapper.update(updatePara, collectMapEntityQueryWrapper);
+        if (fact != 1) {
+            retJson.put("retCode", "9910");
+            retJson.put("retMsg", "删除失败，数据修改异常");
+            return retJson;
+        }
+
+        retJson.put("retCode", "0000");
+        retJson.put("retMsg", "删除收藏成功");
+        return retJson;
+    }
+
+    @Override
+    public JSONObject myCollects(String token) throws Exception {
+
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        userEntityQueryWrapper.eq("id",getUserId(token));
+
+        //查询账号是否存在
+        if (!userMapper.exists(userEntityQueryWrapper)){
+            retJson.put("retCode","9902");
+            retJson.put("retMsg","用户不存在");
+            return retJson;
+        }
+
+        //查询账号封禁状态
+        userEntityQueryWrapper.eq("flag", 1);
+        if (!userMapper.exists(userEntityQueryWrapper)) {
+            retJson.put("retCode","9904");
+            retJson.put("retMsg","喔唷，崩溃啦！显示账号的时候出现了点问题，可能是账号已封禁");
+            return retJson;
+        }
+
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        collectMapEntityQueryWrapper
+                .eq("user_id",getUserId(token))
+                .eq("flag",1);
+        List<CollectMapEntity> collectMapEntityList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+        List<Integer> gameIdList = collectMapEntityList.stream().map(CollectMapEntity::getGameId).collect(Collectors.toList());
+        List<GamesEntity> gamesEntityList = gamesMapper.selectBatchIds(gameIdList);
+        retJson.put("gamesEntityList",gamesEntityList);
         return retJson;
     }
 }

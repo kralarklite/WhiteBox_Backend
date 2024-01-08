@@ -3,10 +3,7 @@ package org.ltboys.controller;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.ltboys.action.ActionResult;
-import org.ltboys.dto.ro.IdRo;
-import org.ltboys.dto.ro.LoginRo;
-import org.ltboys.dto.ro.RegisterRo;
-import org.ltboys.dto.ro.UpdateUserRo;
+import org.ltboys.dto.ro.*;
 import org.ltboys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -130,6 +127,23 @@ public class UserController {
     }
 
     /**
+     * 查询个人收藏
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/mycollects")
+    public ActionResult myCollects(@RequestHeader("token") @Validated String token) throws Exception{
+        try {
+            JSONObject vo = userService.myCollects(token);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("error");
+        }
+    }
+
+    /**
      * 查询用户名称、头像、性别
      * @param ro
      * @return
@@ -139,6 +153,42 @@ public class UserController {
     public ActionResult brief(@RequestBody @Validated IdRo ro) throws Exception {
         try {
             JSONObject vo = userService.brief(ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("登录失败");
+        }
+    }
+
+    /**
+     * 用户添加收藏游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/addcollect")
+    public ActionResult addCollect(@RequestHeader("token") @Validated String token, @RequestBody @Validated UserCollectRo ro) throws Exception {
+        try {
+            JSONObject vo = userService.addCollect(token, ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("登录失败");
+        }
+    }
+
+    /**
+     * 用户删除收藏游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/deletecollect")
+    public ActionResult deleteCollect(@RequestHeader("token") @Validated String token, @RequestBody @Validated UserCollectRo ro) throws Exception {
+        try {
+            JSONObject vo = userService.deleteCollect(token, ro);
             return ActionResult.success(vo);
         } catch (Exception e) {
             log.error(e.getMessage());

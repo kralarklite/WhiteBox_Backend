@@ -11,11 +11,7 @@ import org.ltboys.mysql.entity.CollectMapEntity;
 import org.ltboys.mysql.entity.GamesEntity;
 import org.ltboys.mysql.entity.TagEntity;
 import org.ltboys.mysql.entity.TagMapEntity;
-import org.ltboys.mysql.mapper.GameStatisticMapper;
-import org.ltboys.mysql.mapper.CollectMapMapper;
-import org.ltboys.mysql.mapper.GamesMapper;
-import org.ltboys.mysql.mapper.TagMapMapper;
-import org.ltboys.mysql.mapper.TagMapper;
+import org.ltboys.mysql.mapper.*;
 import org.ltboys.service.GamesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -233,6 +229,9 @@ public class GamesServiceImpl implements GamesService {
         return retJson;
     }
 
+
+
+    @Override
     public JSONObject recommendGames(IdRo ro) throws Exception{
         JSONObject retJson = new JSONObject();
         QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
