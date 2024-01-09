@@ -395,8 +395,23 @@ public class GamesServiceImpl implements GamesService {
                 List<Integer> differentGameIds = otherUserCollectedGameList.stream()
                         .filter(gameId -> !userCollectedGameList.contains(gameId))
                         .collect(Collectors.toList());
-                List<GamesEntity> recommendCollectGame = gamesMapper.selectBatchIds(differentGameIds);
-                retJson.put("CollectGameRecommendGame",recommendCollectGame);
+                QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
+                gamesEntityQueryWrapper
+                        .in("id", differentGameIds)
+                        .eq("flag", 1)
+                        .orderBy(true,true,"RAND()");
+                List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+                if (gamesEntityList.size()<4) {
+                    QueryWrapper<GamesEntity> gamesEntityQueryWrapper1 = new QueryWrapper<>();
+                    gamesEntityQueryWrapper1
+                            .eq("flag", 1)
+                            .orderBy(true,true,"RAND()");
+                    List<GamesEntity> gamesEntityList1 = gamesMapper.selectList(gamesEntityQueryWrapper1);
+                    gamesEntityList.addAll(gamesEntityList1);
+                }
+                Collections.shuffle(gamesEntityList);
+                //List<GamesEntity> recommendCollectGame = gamesMapper.selectBatchIds(differentGameIds);
+                retJson.put("CollectGameRecommendGame",gamesEntityList);
                 break;  // You may want to break out of the loop once you find the first user
             }
             }
