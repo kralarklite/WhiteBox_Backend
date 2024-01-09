@@ -313,10 +313,35 @@ public class GamesServiceImpl implements GamesService {
 // Output the recommended gameId
 
             if (!gameIdsNotInUser.isEmpty()) {
-                List<GamesEntity> gamelst = gamesMapper.selectBatchIds(gameIdsNotInUser);
-                retJson.put("recommendedGames", gamelst);
+                QueryWrapper<GamesEntity> gamesEntityQueryWrapper1 = new QueryWrapper<>();
+                gamesEntityQueryWrapper1
+                        .in("id",gameIdsNotInUser)
+                        .last("LIMIT " + 4)
+                        .orderBy(true,true,"RAND()");
+                List<GamesEntity> gamesEntities = gamesMapper.selectList(gamesEntityQueryWrapper1);
+                //List<GamesEntity> gamelst = gamesMapper.selectBatchIds(gameIdsNotInUser);
+                if (gamesEntities.size()<4) {
+                    int need = 4 - gamesEntities.size();
+                    QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
+                    gamesEntityQueryWrapper
+                            .eq("flag", 1)
+                            .last("LIMIT " + need)
+                            .notIn("id",gameIdsNotInUser)
+                            .orderBy(true,true,"RAND()");
+                    List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+                    gamesEntities.addAll(gamesEntityList);
+                }
+                Collections.shuffle(gamesEntities);
+                retJson.put("recommendedGames", gamesEntities);
             } else {
-                retJson.put("recommendedGameId", null);
+                int need = 4;
+                QueryWrapper<GamesEntity> gamesEntityQueryWrapper = new QueryWrapper<>();
+                gamesEntityQueryWrapper
+                        .eq("flag", 1)
+                        .last("LIMIT " + need)
+                        .orderBy(true,true,"RAND()");
+                List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
+                retJson.put("recommendedGames", gamesEntityList);
             }
 
         } catch (Exception e) {

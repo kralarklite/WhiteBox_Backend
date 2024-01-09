@@ -92,4 +92,30 @@ public interface UserService {
      * @throws Exception
      */
     JSONObject myCollects(String token) throws Exception;
+
+    /**
+     * 用户评分游戏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject rateGame(String token, RateGameRo ro) throws Exception;
+
+    /**
+     * 用户查看对某游戏的评分和收藏状态
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject viewGameUser(UserCollectRo ro) throws Exception;
+
+    /**
+     * 接收用户首次推荐得到的游戏id并收藏
+     * @param token
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject chooseGame(String token, ChooseGameRo ro) throws Exception;
 }
