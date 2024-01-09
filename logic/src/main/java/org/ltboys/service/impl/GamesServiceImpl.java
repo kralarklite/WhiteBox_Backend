@@ -241,7 +241,6 @@ public class GamesServiceImpl implements GamesService {
     }
 
 
-
     @Override
     public JSONObject recommendGames(IdRo ro) throws Exception{
         JSONObject retJson = new JSONObject();
@@ -328,6 +327,58 @@ public class GamesServiceImpl implements GamesService {
         return retJson;
 
     }
+    @Override
+    public JSONObject collectRecommend(IdRo ro) throws Exception{
+        JSONObject retJson = new JSONObject();
+
+        QueryWrapper<CollectMapEntity> collectMapEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<UserEntity> userEntityQueryWrapper = new QueryWrapper<>();
+        collectMapEntityQueryWrapper
+                .eq("user_id",ro.getId());
+        //获取目标用户收藏的gameid
+        List<CollectMapEntity> userCollectedGameEntityList = collectMapMapper.selectList(collectMapEntityQueryWrapper);
+        List<Integer> userCollectedGameList = userCollectedGameEntityList.stream()
+                .map(CollectMapEntity::getGameId)
+                .collect(Collectors.toList());
+        //获取所有用户的id用于遍历
+        List<Integer> userIdList = userMapper.selectList(userEntityQueryWrapper.select("id"))
+                .stream()
+                .map(UserEntity::getId)
+                .collect(Collectors.toList());
+
+        for (Integer otherUserId : userIdList){
+            if (otherUserId.equals(ro.getId())){
+                continue;
+            }
+
+            QueryWrapper<CollectMapEntity> otherCollectMapEntityQueryWrapper = new QueryWrapper<>();
+            otherCollectMapEntityQueryWrapper.eq("user_id", otherUserId);
+            List<CollectMapEntity> otherUserCollectedGameEntityList = collectMapMapper.selectList(otherCollectMapEntityQueryWrapper);
+            List<Integer> otherUserCollectedGameList = otherUserCollectedGameEntityList.stream()
+                    .map(CollectMapEntity::getGameId)
+                    .collect(Collectors.toList());
+
+            // Find the common game IDs between the two users
+            List<Integer> commonGameIds = otherUserCollectedGameList.stream()
+                    .filter(gameId -> userCollectedGameList.contains(gameId))
+                    .collect(Collectors.toList());
+
+            // Check if the count of common game IDs is between 2 and 4
+            int commonGameIdsCount = commonGameIds.size();
+            if (commonGameIdsCount >= 2 && commonGameIdsCount <= 4) {
+                // Output the userId and the different game IDs
+                List<Integer> differentGameIds = otherUserCollectedGameList.stream()
+                        .filter(gameId -> !userCollectedGameList.contains(gameId))
+                        .collect(Collectors.toList());
+                List<GamesEntity> recommendCollectGame = gamesMapper.selectBatchIds(differentGameIds);
+                retJson.put("CollectGameRecommendGame",recommendCollectGame);
+                break;  // You may want to break out of the loop once you find the first user
+            }
+            }
+        return retJson;
+    }
+
+
 
     private double calculatePearsonSimilarity(Map<Integer,Double> user1, Map<Integer,Double> user2) {
         List<Integer> commonItems = new ArrayList<>();
