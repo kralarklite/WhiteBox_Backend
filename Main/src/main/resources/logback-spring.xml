@@ -5,7 +5,7 @@
     <property name="maxHistory" value="10"></property>
     <property name="totalSizeCap" value="2GB"></property>
     <property name="logHome" value="./logs"></property>
-    <property name="serverName" value="SzLivePlatform"></property>
+    <property name="serverName" value="WhiteBox_Backend"></property>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -49,7 +49,7 @@
     </appender>
 
     <logger name="org.springframework" level="INFO"></logger>
-    <logger name="com.abchina" level="DEBUG"></logger>
+    <logger name="org.ltboys" level="DEBUG"></logger>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"></appender-ref>

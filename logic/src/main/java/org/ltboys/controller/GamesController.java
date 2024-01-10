@@ -74,7 +74,7 @@ public class GamesController {
     }
 
     /**
-     * 根据用户收藏推荐游戏
+     * 根据用户打分推荐游戏
      * @param ro
      * @return
      * @throws Exception
@@ -90,5 +90,21 @@ public class GamesController {
         }
     }
 
+    /**
+     * 根据用户收藏推荐游戏
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/collectrecommend")
+    public ActionResult collectRecommend(@RequestBody @Validated IdRo ro) throws  Exception {
+        try {
+            JSONObject vo = gamesService.collectRecommend(ro);
+            return ActionResult.success(vo);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ActionResult.failure("查询游戏失败");
+        }
+    }
 
 }

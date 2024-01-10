@@ -35,10 +35,18 @@ public interface GamesService {
     JSONObject getTags() throws Exception;
 
     /**
-     * 根据用户收藏推荐游戏
+     * 根据用户打分推荐游戏
      * @param ro
      * @return
      * @throws Exception
      */
     JSONObject recommendGames(IdRo ro) throws Exception;
+
+    /**
+     * 根据用户收藏推荐游戏
+     * @param ro
+     * @return
+     * @throws Exception
+     */
+    JSONObject collectRecommend(IdRo ro) throws Exception;
 }

@@ -53,7 +53,7 @@ public class PictureServiceImpl  implements PictureService {
 //}
     @Override
     public JSONObject savePicture(MultipartFile ro) throws Exception{
-        String apitoken = "rr7kN3H7YTL21ADvYI2NAyAtbKoROOLP";
+        String apitoken = "4pLGBUZxPH2ugyHGyMXNTnNBmsoToq5b";
         String url = "https://smms.app/api/v2/upload";
 
         try {
