@@ -179,6 +179,9 @@ public class ArticleServiceImpl implements ArticleService {
         int count = 0;
         StringBuilder picture = new StringBuilder();
         while (m.find()) {
+            if (count!=0){
+                picture.append(' ');
+            }
             String match = m.group(3); // 提取第三个捕获组中的内容
 //            String fileName = m.group(2); // 提取第二个捕获组中的内容
             picture.append(match);
@@ -186,7 +189,6 @@ public class ArticleServiceImpl implements ArticleService {
             if (count >= 3) {
                 break;
             }
-            picture.append(' ');
         }
         articleEntity.setPicture(picture.toString());
 
