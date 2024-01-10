@@ -2,6 +2,9 @@ package org.ltboys.dto.vo;
 
 import lombok.Data;
 
+/**
+ * @author kralarklite
+ */
 @Data
 public class UserBriefVo {
     private String userName;

@@ -399,13 +399,16 @@ public class GamesServiceImpl implements GamesService {
                 gamesEntityQueryWrapper
                         .in("id", differentGameIds)
                         .eq("flag", 1)
-                        .orderBy(true,true,"RAND()");
+                        .orderBy(true,true,"RAND()")
+                        .last("LIMIT 4");
                 List<GamesEntity> gamesEntityList = gamesMapper.selectList(gamesEntityQueryWrapper);
                 if (gamesEntityList.size()<4) {
+                    int need = 4 - gamesEntityList.size();
                     QueryWrapper<GamesEntity> gamesEntityQueryWrapper1 = new QueryWrapper<>();
                     gamesEntityQueryWrapper1
                             .eq("flag", 1)
-                            .orderBy(true,true,"RAND()");
+                            .orderBy(true,true,"RAND()")
+                            .last("LIMIT "+need);
                     List<GamesEntity> gamesEntityList1 = gamesMapper.selectList(gamesEntityQueryWrapper1);
                     gamesEntityList.addAll(gamesEntityList1);
                 }
